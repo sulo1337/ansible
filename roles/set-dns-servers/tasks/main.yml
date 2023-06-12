@@ -1,0 +1,12 @@
+---
+- name: Backup current resolv.conf
+  copy:
+    src: /etc/resolv.conf
+    dest: /etc/resolv.conf.backup
+    remote_src: yes
+
+- name: Add list of IPs as DNS servers
+  lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ item }}"
+  loop: "{{ dns_servers }}"

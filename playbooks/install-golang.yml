@@ -1,0 +1,8 @@
+---
+- name: Install golang
+  hosts: all
+  become: yes
+  remote_user: tickerbot
+  roles:
+    - role: install-golang
+      golang_version: 1.19

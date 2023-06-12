@@ -1,0 +1,23 @@
+---
+- name: Stop traefik container
+  command: docker-compose down -v
+  args:
+    chdir: /etc/traefik
+  ignore_errors: true
+
+- name: Remove traefik configuration files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/traefik/traefik.yaml
+    - /etc/traefik/docker-compose.yaml
+  ignore_errors: true
+
+- name: Remove traefik configuration directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/traefik
+  ignore_errors: true

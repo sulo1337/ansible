@@ -1,0 +1,27 @@
+---
+- name: Check if Go is installed
+  shell: go version | grep {{ golang_version }}
+  register: go_installed
+  failed_when: false
+  changed_when: false
+
+- name: Download Go tarball
+  get_url:
+    url: "https://golang.org/dl/go{{ golang_version }}.linux-amd64.tar.gz"
+    dest: "/tmp/go{{ golang_version }}.linux-amd64.tar.gz"
+  when: go_installed.rc != 0
+
+- name: Extract Go tarball
+  unarchive:
+    src: "/tmp/go{{ golang_version }}.linux-amd64.tar.gz"
+    dest: "{{ golang_install_dir }}"
+    creates: "{{ golang_install_dir }}/go/bin/go"
+    remote_src: yes
+  when: go_installed.rc != 0
+
+- name: Set up Go environment
+  lineinfile:
+    path: "/etc/profile"
+    line: 'export PATH=$PATH:{{ golang_install_dir }}/go/bin'
+    insertafter: EOF
+  when: go_installed.rc != 0

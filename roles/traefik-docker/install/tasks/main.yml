@@ -1,0 +1,47 @@
+---
+- name: Check environment variable for cloudflare api key
+  fail:
+    msg: "Environment variable CLOUDFLARE_DNS_API_TOKEN is not defined or empty"
+  when: lookup('env', 'CLOUDFLARE_DNS_API_TOKEN') == ''
+
+- name: Set cloudflare api key from environment variable
+  set_fact:
+    cloudflare_dns_api_token: "{{ lookup('env', 'CLOUDFLARE_DNS_API_TOKEN') }}"
+  failed_when: cloudflare_dns_api_token is not defined
+
+- name: Verify docker installation
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Verify Docker Compose installation
+  command: docker-compose --version
+  register: compose_version_check
+  failed_when: compose_version not in compose_version_check.stdout
+
+- name: Create directories for Traefik configuration
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/traefik
+    - /ssl-certs
+
+- name: Copy traefik configuration file
+  template:
+    src: "traefik.yaml.j2"
+    dest: /etc/traefik/traefik.yaml
+  
+- name: Copy docker-compose file
+  template:
+    src: "docker-compose.yaml.j2"
+    dest: /etc/traefik/docker-compose.yaml
+
+- name: Start traefik container
+  shell: docker-compose up -d --force-recreate
+  args:
+    chdir: /etc/traefik
+  tags: traefik
+  environment:
+    CLOUDFLARE_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"

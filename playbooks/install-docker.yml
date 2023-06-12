@@ -1,0 +1,11 @@
+---
+- name: Install Docker
+  hosts: master
+  become: yes
+  roles:
+    - role: apt-update
+    - role: install-docker-debian
+      docker_user: tickerbot
+      os: ubuntu
+      architecture: amd64
+      release_version: jammy

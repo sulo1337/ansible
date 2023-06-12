@@ -1,0 +1,10 @@
+---
+- name: Install wireguard
+  become: yes
+  hosts: all
+  roles:
+    - role: apt-update
+    - role: install-apt-package
+      package_list:
+        - "wireguard"
+        - "resolvconf"

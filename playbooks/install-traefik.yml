@@ -1,0 +1,10 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook will setup a gateway host with traefik that serves public/internal traffic
+  #   usage: ansible-playbook -i <inventory> /path/to/install-traefik.yml
+---
+- name: Install traefik
+  become: true
+  hosts: traefik_host
+  roles:
+    - role: traefik-docker/install
