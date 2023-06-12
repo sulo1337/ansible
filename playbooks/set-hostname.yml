@@ -1,0 +1,10 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook will set hostname of servers to variable `hostname` for specified server
+  #   usage: ansible-playbook -i <inventory> /path/to/set-hostname.yml
+---
+- name: Set hostname
+  become: true
+  hosts: all
+  roles:
+    - role: set-hostname
