@@ -5,6 +5,6 @@
 ---
 - name: Install traefik
   become: true
-  hosts: traefik_host
+  hosts: traefik_server
   roles:
     - role: traefik-docker/install

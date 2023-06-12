@@ -1,0 +1,10 @@
+per_listener_settings false
+listener {{ nm_mq_port }}
+protocol websockets
+allow_anonymous false
+
+listener 1883
+protocol websockets
+allow_anonymous false
+
+password_file /mosquitto/password.txt

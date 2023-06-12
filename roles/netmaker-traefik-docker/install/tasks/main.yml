@@ -1,0 +1,62 @@
+---
+- name: Check if environment variables are set
+  fail:
+    msg: "Environment variable {{ item }} is not set"
+  when: lookup('env', item) is none or lookup('env', item) == ""
+  loop:
+    - NM_MASTER_KEY
+    - NM_TURN_PASSWORD
+    - NM_MQ_PASSWORD
+
+- name: Set necessary environment variables
+  set_fact:
+    nm_master_key: "{{ lookup('env', 'NM_MASTER_KEY') }}"
+    nm_turn_password: "{{ lookup('env', 'NM_TURN_PASSWORD') }}"
+    nm_mq_password: "{{ lookup('env', 'NM_MQ_PASSWORD') }}"
+  failed_when: cloudflare_dns_api_token is not defined
+
+- name: Verify docker installation
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Verify Docker Compose installation
+  command: docker-compose --version
+  register: compose_version_check
+  failed_when: compose_version not in compose_version_check.stdout
+
+- name: Create directories for Netmaker configuration
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/netmaker
+
+- name: Copy mosquitto config file
+  template:
+    src: "mosquitto.conf.j2"
+    mode: 0644
+    dest: /etc/netmaker/mosquitto.conf
+
+- name: Copy mosquitto wait.sh file
+  template:
+    src: "wait.sh.j2"
+    mode: 0755
+    dest: /etc/netmaker/wait.sh
+  
+- name: Copy docker-compose file
+  template:
+    src: "docker-compose.yaml.j2"
+    mode: 0600
+    dest: /etc/netmaker/docker-compose.yaml
+
+- name: Start netmaker containers
+  shell: docker-compose up -d --force-recreate
+  args:
+    chdir: /etc/netmaker
+  tags: netmaker
+  environment:
+    NM_MASTER_KEY: "{{ nm_master_key }}"
+    NM_TURN_PASSWORD: "{{ nm_turn_password }}"
+    NM_MQ_PASSWORD: "{{ nm_mq_password }}"

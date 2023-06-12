@@ -39,7 +39,7 @@
     dest: /etc/traefik/docker-compose.yaml
 
 - name: Start traefik container
-  shell: docker-compose up -d --force-recreate
+  shell: docker-compose up -d
   args:
     chdir: /etc/traefik
   tags: traefik

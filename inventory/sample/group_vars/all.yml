@@ -5,6 +5,11 @@ public_key_path: ""
 public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDYOBxVbpUmuTekV26UWOkjxe23+1OcHwnSiUfCZ+88lPoH/CyxjGtM6UFVyzO6SNl4Ful9Nj8L+piHSL0siBHZqHr2CyEnALZFP0db0NqgpWXAQxtWQXcV9Hcb5NGwJsXwk6bqI4dq5p2KaLpVJUqTDTjAMICmDA+h5OvWPDkRtj3S+MLdQ4m5caKcDCW0pgN6s3JpjlpKL3KoUKKiwb+hklsFkvBwk4XusIYz9KzoM4DRBLYQmqEmd3LXsGu2IiFBneVqBRTLPaSPu+KsZ/ZimRQpNJa8hGI8g79NyNDoTea+T7WWTnvufbWTmwszx+UM1Y3iZtefKkK2r46SZQFxB426IBIMdUe9lCvPjPUvsPKJ/+XeiitVCJ+O77YBILH9tHyvdChdj+AobLMZ3i5SPi6Wt4eZXKEdk8lPel1EBE+znBfe7/xJGXqwhMfnKI7sp+EjZPSDSn8+JQrS69GkC7z5SpwODdM10F17FRbdeMH4mE89fzeqP8qaEScHnr8= sulochan@tickerwolf.com"
 # END ----- user setup variables
 
+# START ----- docker setup variables
+docker_user: user
+compose_version: "v2.18.1"
+# END ----- docker setup variables
+
 # START ----- traefik setup variables
 traefik_acme_http_email: email@domain.com
 traefik_acme_dns_email: email@domain.com
@@ -13,3 +18,37 @@ traefik_ssl_cert_volume_name: ssl_certs
 traefik_fqdn: traefik.some_domain.com
 traefik_network_name: traefik_net
 # END ----- traefik setup variables
+
+# START ----- netmaker setup variables
+nm_image_version: v0.20.1
+nm_mosquitto_image_version: 2.0.15-openssl
+nm_turnserver_image_version: v1.0.0
+nm_domain: domain.com
+nm_server_host: 1.1.1.1 # public IP of netmaker server
+nm_stun_port: 3478
+nm_api_port: 8081
+nm_turn_port: 3479
+nm_turn_api_port: 8089
+nm_mq_port: 8883
+nm_server_broker_endpoint: ws://mq:1883
+nm_broker_subdomain: nmbroker
+nm_stun_subdomain: nmstun
+nm_turn_subdomain: nmturn
+nm_api_subdomain: nmapi
+nm_dashboard_subdomain: nmdashboard
+nm_turnapi_subdomain: nmturnapi
+nm_cors_allowed_origin: "https://nmdashboard.domain.com"
+nm_traefik_network_name: traefik_net
+nm_turn_username: netmaker
+nm_mq_username: netmaker
+nm_dns_mode: on 
+nm_display_keys: on
+nm_default_proxy_mode: off
+nm_debug_mode: off 
+nm_telemetry: off
+nm_rest_backend: on 
+nm_disable_remote_ip_check: off
+nm_log_verbosity: 1
+nm_netclient_auto_update: enabled 
+nm_database: sqlite # only sqlite supported by automation for now
+#END ----- netmaker setup variables

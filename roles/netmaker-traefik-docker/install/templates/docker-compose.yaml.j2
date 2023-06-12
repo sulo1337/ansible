@@ -1,0 +1,163 @@
+version: "3.4"
+
+services:
+
+  netmaker:
+    container_name: netmaker
+    image: gravitl/netmaker:{{ nm_image_version }}
+    restart: always
+    volumes:
+      - netmaker-dnsconfig:/root/config/dnsconfig
+      - netmaker-data:/root/data
+    environment:
+      - STUN_LIST={{ nm_stun_subdomain }}.{{ nm_domain }}:{{ nm_stun_port }},stun1.netmaker.io:3478,stun2.netmaker.io:3478,stun1.l.google.com:19302,stun2.l.google.com:19302
+      - BROKER_ENDPOINT=wss://{{ nm_broker_subdomain }}.{{ nm_domain }}
+      - SERVER_NAME={{ nm_domain }}
+      - SERVER_API_CONN_STRING={{ nm_api_subdomain }}.{{ nm_domain }}:443
+      - COREDNS_ADDR={{ nm_server_host }}
+      - SERVER_HTTP_HOST={{ nm_api_subdomain }}.{{ nm_domain }}
+      - TURN_SERVER_HOST=nmturn.{{ nm_domain }}
+      - TURN_SERVER_API_HOST=https://{{ nm_turnapi_subdomain }}.{{ nm_domain }}
+      # common environment settings
+      - NM_DOMAIN={{ nm_domain }}
+      - SERVER_HOST={{ nm_server_host }}
+      - INSTALL_TYPE=ce
+      - DNS_MODE={{ nm_dns_mode }}
+      - NETCLIENT_AUTO_UPDATE={{ nm_netclient_auto_update }}
+      - API_PORT={{ nm_api_port }}
+      - CORS_ALLOWED_ORIGIN={{ nm_cors_allowed_origin }}
+      - DISPLAY_KEYS={{ nm_display_keys }}
+      - DATABASE={{ nm_database }}
+      - SERVER_BROKER_ENDPOINT=ws://mq:1883
+      - STUN_PORT={{ nm_stun_port }}
+      - VERBOSITY={{ nm_log_verbosity }}
+      - DEFAULT_PROXY_MODE={{ nm_default_proxy_mode }}
+      - TURN_PORT={{ nm_turn_port }}
+      - USE_TURN=true
+      - DEBUG_MODE={{ nm_debug_mode }}
+      - TURN_API_PORT={{ nm_turn_api_port }}
+      - REST_BACKEND={{ nm_rest_backend }}
+      - DISABLE_REMOTE_IP_CHECK={{ nm_disable_remote_ip_check }}
+      - TELEMETRY={{ nm_telemetry }}
+      - TURN_USERNAME={{ nm_turn_username }}
+      - MQ_USERNAME={{ nm_mq_username }}
+      # credentials are retrieved from env variables
+      - MASTER_KEY=${NM_MASTER_KEY}
+      - TURN_PASSWORD=${NM_TURN_PASSWORD}
+      - MQ_PASSWORD=${NM_MQ_PASSWORD}
+    ports:
+      - "{{ nm_stun_port }}:{{ nm_stun_port }}/udp"
+    networks:
+      - {{ nm_traefik_network_name }}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.netmaker.rule: Host(`{{ nm_api_subdomain }}.{{ nm_domain }}`)
+      traefik.http.routers.netmaker.entrypoints: websecure
+      traefik.http.routers.netmaker.tls: true
+      traefik.http.routers.netmaker.tls.certResolver: dns
+      traefik.http.routers.netmaker.service: netmaker
+      traefik.http.services.netmaker.loadbalancer.server.port: {{ nm_api_port }}
+      traefik.http.routers.stun.rule: Host(`{{ nm_stun_subdomain }}.{{ nm_domain }}`)
+      traefik.http.routers.stun.entrypoints: websecure
+      traefik.http.routers.stun.tls: true
+      traefik.http.routers.stun.tls.certResolver: dns
+      traefik.http.routers.stun.service: stun
+      traefik.http.services.stun.loadbalancer.server.port: {{ nm_stun_port }}
+
+  netmaker-ui:
+    container_name: netmaker-ui
+    image: gravitl/netmaker-ui:{{ nm_image_version }}
+    environment:
+      # config-dependant vars
+      # URL where UI will send API requests. Change based on SERVER_HOST, SERVER_HTTP_HOST, and API_PORT
+      - BACKEND_URL="https://{{ nm_api_subdomain }}.{{ nm_domain }}"
+    depends_on:
+      - netmaker
+    links:
+      - "netmaker:api"
+    restart: always
+    networks:
+      - {{ nm_traefik_network_name }}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.nmdashboard.rule: Host(`{{ nm_dashboard_subdomain }}.{{ nm_domain }}`)
+      traefik.http.routers.nmdashboard.entrypoints: websecure
+      traefik.http.routers.nmdashboard.tls: true
+      traefik.http.routers.nmdashboard.tls.certResolver: dns
+      traefik.http.services.nmdashboard.loadbalancer.server.port: 80
+      
+
+  coredns:
+    container_name: coredns
+    image: coredns/coredns
+    command: -conf /root/dnsconfig/Corefile
+    depends_on:
+      - netmaker
+    restart: always
+    networks:
+      - {{ nm_traefik_network_name }}
+    volumes:
+      - netmaker-dnsconfig:/root/dnsconfig
+
+  mq:
+    container_name: mq
+    image: eclipse-mosquitto:2.0.15-openssl
+    depends_on:
+      - netmaker
+    restart: always
+    command: [ "/mosquitto/config/wait.sh" ]
+    environment:
+      - MQ_USERNAME={{ nm_mq_username }}
+      - MQ_PASSWORD=${NM_MQ_PASSWORD}
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./wait.sh:/mosquitto/config/wait.sh
+      - netmaker-mosquitto-logs:/mosquitto/log
+      - netmaker-mosquitto-data:/mosquitto/data
+    networks:
+      - {{ nm_traefik_network_name }}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.broker.rule: Host(`nmbroker.{{ nm_domain }}`)
+      traefik.http.routers.broker.entrypoints: websecure
+      traefik.http.routers.broker.tls: true
+      traefik.http.routers.broker.tls.certResolver: dns
+      traefik.http.services.broker.loadbalancer.server.port: {{ nm_mq_port }}
+      traefik.http.services.broker.loadbalancer.server.scheme: wss
+
+  turn:
+    container_name: turn
+    image: gravitl/turnserver:{{ nm_turnserver_image_version }}
+    environment:
+      - USERNAME={{ nm_turn_username }}
+      - PASSWORD=${NM_TURN_PASSWORD}
+      - TURN_SERVER_HOST={{ nm_turn_subdomain }}.{{ nm_domain }}
+    network_mode: "host"
+    volumes:
+      - netmaker-turn-server-data:/etc/config
+    restart: always
+    labels:
+      traefik.enable: true
+      traefik.http.routers.turn.rule: Host(`{{ nm_turn_subdomain }}.{{ nm_domain }}`)
+      traefik.http.routers.turn.entrypoints: websecure
+      traefik.http.routers.turn.tls: true
+      traefik.http.routers.turn.tls.certResolver: dns
+      traefik.http.routers.turn.service: turn
+      traefik.http.services.turn.loadbalancer.server.port: {{ nm_turn_port }}
+      traefik.http.routers.turnapi.rule: Host(`{{ nm_turnapi_subdomain }}.{{ nm_domain }}`)
+      traefik.http.routers.turnapi.entrypoints: websecure
+      traefik.http.routers.turnapi.tls: true
+      traefik.http.routers.turnapi.tls.certResolver: dns
+      traefik.http.routers.turnapi.service: turnapi
+      traefik.http.services.turnapi.loadbalancer.server.port: {{ nm_turn_api_port }}
+
+volumes:
+  netmaker-data: { }
+  netmaker-dnsconfig: { } # storage for coredns
+  netmaker-mosquitto-logs: { } # storage for mqtt logs
+  netmaker-mosquitto-data: { } # storage for mqtt data
+  netmaker-turn-server-data: { }
+
+networks:
+  {{ nm_traefik_network_name }}:
+    external: true

@@ -1,0 +1,10 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook remove netmaker installation from provided hosts
+  #   usage: ansible-playbook -i <inventory> /path/to/uninstall-netmaker.yml
+---
+- name: Uninstall traefik
+  become: true
+  hosts: netmaker_server
+  roles:
+    - role: netmaker-traefik-docker/uninstall

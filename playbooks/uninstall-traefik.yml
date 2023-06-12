@@ -3,8 +3,8 @@
   #   description: This playbook remove traefik installation from provided hosts
   #   usage: ansible-playbook -i <inventory> /path/to/uninstall-traefik.yml
 ---
-- name: Install traefik
+- name: Uninstall traefik
   become: true
-  hosts: traefik_host
+  hosts: traefik_server
   roles:
-    - role: traefik-docker/install
+    - role: traefik-docker/uninstall

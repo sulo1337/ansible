@@ -1,0 +1,12 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook will install a netmaker server using traefik as reverse proxy
+  #   usage: ansible-playbook -i <inventory> /path/to/install-netmaker.yml
+  #   refer to sample/group_vars/all.yml for parameters
+---
+- name: Install netmaker
+  become: true
+  hosts: netmaker_server
+  roles:
+    - role: traefik-docker/install
+    - role: netmaker-traefik-docker/install

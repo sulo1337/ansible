@@ -1,0 +1,24 @@
+---
+- name: Stop netmaker containers
+  command: docker-compose down -v
+  args:
+    chdir: /etc/netmaker
+  ignore_errors: true
+
+- name: Remove netmaker configuration files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/netmaker/docker-compose.yaml
+    - /etc/netmaker/mosquitto.conf
+    - /etc/netmaker/wait.sh
+  ignore_errors: true
+
+- name: Remove netmaker configuration directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/netmaker
+  ignore_errors: true
