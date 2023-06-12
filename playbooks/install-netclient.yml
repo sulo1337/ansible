@@ -1,0 +1,11 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook will install netclient in vpn hosts
+  #   usage: ansible-playbook -i <inventory> /path/to/install-netclient.yml
+  #   refer to sample/group_vars/all.yml for parameters
+---
+- name: Install netclient
+  become: true
+  hosts: vpn_clients
+  roles:
+    - role: netclient/install

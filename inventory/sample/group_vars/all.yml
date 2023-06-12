@@ -52,3 +52,9 @@ nm_log_verbosity: 1
 nm_netclient_auto_update: enabled 
 nm_database: sqlite # only sqlite supported by automation for now
 #END ----- netmaker setup variables
+
+# START ----- netclient setup variables
+nc_version: v0.20.1
+nc_os_dist: linux
+nc_arch: amd64
+# END ----- netclient setup variables

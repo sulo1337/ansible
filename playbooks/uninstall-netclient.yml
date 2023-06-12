@@ -1,0 +1,11 @@
+  # meta:
+  #   author: Sulochan Acharya
+  #   description: This playbook will uninstall netclient in vpn hosts
+  #   usage: ansible-playbook -i <inventory> /path/to/uninstall-netclient.yml
+  #   refer to sample/group_vars/all.yml for parameters
+---
+- name: Uninstall netclient
+  become: true
+  hosts: vpn_clients
+  roles:
+    - role: netclient/uninstall

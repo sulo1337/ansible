@@ -1,0 +1,24 @@
+---
+- name: Check if netclient is installed
+  shell: command -v /usr/sbin/netclient
+  register: netclient_check
+  failed_when: false
+  changed_when: false
+
+- name: Download and install netclient
+  block:
+    - name: Download netclient
+      get_url:
+        url: "https://fileserver.netmaker.io/releases/download/{{ nc_version }}/netclient-{{ nc_os_dist }}-{{ nc_arch }}"
+        dest: "/usr/local/bin/netclient"
+        mode: '0755'
+    - name: Install netclient
+      command: /usr/local/bin/netclient install
+      become: yes
+  when: netclient_check.rc != 0
+
+- name: Ensure netclient.service is running
+  systemd:
+    name: netclient
+    state: started
+    enabled: yes
