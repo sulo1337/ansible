@@ -10,7 +10,7 @@ services:
       - netmaker-dnsconfig:/root/config/dnsconfig
       - netmaker-data:/root/data
     environment:
-      - STUN_LIST={{ nm_stun_subdomain }}.{{ nm_domain }}:{{ nm_stun_port }},stun1.netmaker.io:3478,stun2.netmaker.io:3478,stun1.l.google.com:19302,stun2.l.google.com:19302
+      - STUN_LIST={{ nm_stun_subdomain }}.{{ nm_domain }},stun1.netmaker.io:3478,stun2.netmaker.io:3478,stun1.l.google.com:19302,stun2.l.google.com:19302
       - BROKER_ENDPOINT=wss://{{ nm_broker_subdomain }}.{{ nm_domain }}
       - SERVER_NAME={{ nm_domain }}
       - SERVER_API_CONN_STRING={{ nm_api_subdomain }}.{{ nm_domain }}:443
