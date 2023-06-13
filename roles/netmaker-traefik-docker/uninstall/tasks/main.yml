@@ -1,6 +1,6 @@
 ---
 - name: Stop netmaker containers
-  command: docker-compose down -v
+  command: docker-compose down
   args:
     chdir: /etc/netmaker
   ignore_errors: true

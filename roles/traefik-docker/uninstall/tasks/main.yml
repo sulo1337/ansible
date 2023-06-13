@@ -1,6 +1,6 @@
 ---
 - name: Stop traefik container
-  command: docker-compose down -v
+  command: docker-compose down
   args:
     chdir: /etc/traefik
   ignore_errors: true

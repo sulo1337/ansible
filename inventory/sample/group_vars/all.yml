@@ -17,6 +17,7 @@ traefik_image_version: v2.10.1
 traefik_ssl_cert_volume_name: ssl_certs
 traefik_fqdn: traefik.some_domain.com
 traefik_network_name: traefik_net
+cert_resolver: dns-staging # one of http-staging,dns-staging,http,dns
 # END ----- traefik setup variables
 
 # START ----- netmaker setup variables
@@ -30,14 +31,13 @@ nm_api_port: 8081
 nm_turn_port: 3479
 nm_turn_api_port: 8089
 nm_mq_port: 8883
-nm_server_broker_endpoint: ws://mq:1883
 nm_broker_subdomain: nmbroker
 nm_stun_subdomain: nmstun
 nm_turn_subdomain: nmturn
 nm_api_subdomain: nmapi
 nm_dashboard_subdomain: nmdashboard
 nm_turnapi_subdomain: nmturnapi
-nm_cors_allowed_origin: "https://nmdashboard.domain.com"
+nm_cors_allowed_origin: https://nmdashboard.domain.com
 nm_traefik_network_name: traefik_net
 nm_turn_username: netmaker
 nm_mq_username: netmaker
@@ -51,6 +51,7 @@ nm_disable_remote_ip_check: off
 nm_log_verbosity: 1
 nm_netclient_auto_update: enabled 
 nm_database: sqlite # only sqlite supported by automation for now
+nm_cert_resolver: dns-staging # one of http-staging,dns-staging,http,dns
 #END ----- netmaker setup variables
 
 # START ----- netclient setup variables

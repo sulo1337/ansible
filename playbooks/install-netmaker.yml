@@ -7,6 +7,9 @@
 - name: Install netmaker
   become: true
   hosts: netmaker_server
+  vars:
+    cert_resolver: dns-staging
+    nm_cert_resolver: dns-staging
   roles:
-    - role: traefik-docker/install
+    # - role: traefik-docker/install
     - role: netmaker-traefik-docker/install

@@ -19,7 +19,7 @@ services:
       traefik.http.routers.traefik_dashboard.rule: Host(`{{ traefik_fqdn }}`)
       traefik.http.routers.traefik_dashboard.entrypoints: websecure
       traefik.http.routers.traefik_dashboard.tls: true
-      traefik.http.routers.traefik_dashboard.tls.certResolver: dns
+      traefik.http.routers.traefik_dashboard.tls.certResolver: {{ cert_resolver }}
       traefik.http.routers.traefik_dashboard.service: api@internal
     networks:
       - tickerwolf

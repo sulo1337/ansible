@@ -13,7 +13,6 @@
     nm_master_key: "{{ lookup('env', 'NM_MASTER_KEY') }}"
     nm_turn_password: "{{ lookup('env', 'NM_TURN_PASSWORD') }}"
     nm_mq_password: "{{ lookup('env', 'NM_MQ_PASSWORD') }}"
-  failed_when: cloudflare_dns_api_token is not defined
 
 - name: Verify docker installation
   service:
@@ -52,7 +51,7 @@
     dest: /etc/netmaker/docker-compose.yaml
 
 - name: Start netmaker containers
-  shell: docker-compose up -d --force-recreate
+  shell: docker-compose up -d
   args:
     chdir: /etc/netmaker
   tags: netmaker

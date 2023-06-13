@@ -19,6 +19,22 @@ entryPoints:
     address: :443
 
 certificatesResolvers:
+  http-staging:
+    acme:
+      email: {{ traefik_acme_http_email }}
+      storage: /ssl-certs/acme.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+  
+  dns-staging:
+    acme:
+      email: {{ traefik_acme_dns_email }}
+      storage: /ssl-certs/acme.json
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      dnsChallenge:
+        provider: cloudflare
+
   http:
     acme:
       email: {{ traefik_acme_http_email }}

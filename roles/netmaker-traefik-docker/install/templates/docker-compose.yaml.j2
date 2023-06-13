@@ -16,7 +16,7 @@ services:
       - SERVER_API_CONN_STRING={{ nm_api_subdomain }}.{{ nm_domain }}:443
       - COREDNS_ADDR={{ nm_server_host }}
       - SERVER_HTTP_HOST={{ nm_api_subdomain }}.{{ nm_domain }}
-      - TURN_SERVER_HOST=nmturn.{{ nm_domain }}
+      - TURN_SERVER_HOST={{ nm_turn_subdomain }}.{{ nm_domain }}
       - TURN_SERVER_API_HOST=https://{{ nm_turnapi_subdomain }}.{{ nm_domain }}
       # common environment settings
       - NM_DOMAIN={{ nm_domain }}
@@ -28,7 +28,7 @@ services:
       - CORS_ALLOWED_ORIGIN={{ nm_cors_allowed_origin }}
       - DISPLAY_KEYS={{ nm_display_keys }}
       - DATABASE={{ nm_database }}
-      - SERVER_BROKER_ENDPOINT=ws://mq:1883
+      - SERVER_BROKER_ENDPOINT=ws://mq:8883
       - STUN_PORT={{ nm_stun_port }}
       - VERBOSITY={{ nm_log_verbosity }}
       - DEFAULT_PROXY_MODE={{ nm_default_proxy_mode }}
@@ -54,13 +54,13 @@ services:
       traefik.http.routers.netmaker.rule: Host(`{{ nm_api_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.netmaker.entrypoints: websecure
       traefik.http.routers.netmaker.tls: true
-      traefik.http.routers.netmaker.tls.certResolver: dns
+      traefik.http.routers.netmaker.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.routers.netmaker.service: netmaker
       traefik.http.services.netmaker.loadbalancer.server.port: {{ nm_api_port }}
       traefik.http.routers.stun.rule: Host(`{{ nm_stun_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.stun.entrypoints: websecure
       traefik.http.routers.stun.tls: true
-      traefik.http.routers.stun.tls.certResolver: dns
+      traefik.http.routers.stun.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.routers.stun.service: stun
       traefik.http.services.stun.loadbalancer.server.port: {{ nm_stun_port }}
 
@@ -70,7 +70,7 @@ services:
     environment:
       # config-dependant vars
       # URL where UI will send API requests. Change based on SERVER_HOST, SERVER_HTTP_HOST, and API_PORT
-      - BACKEND_URL="https://{{ nm_api_subdomain }}.{{ nm_domain }}"
+      - BACKEND_URL=https://{{ nm_api_subdomain }}.{{ nm_domain }}
     depends_on:
       - netmaker
     links:
@@ -83,7 +83,7 @@ services:
       traefik.http.routers.nmdashboard.rule: Host(`{{ nm_dashboard_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.nmdashboard.entrypoints: websecure
       traefik.http.routers.nmdashboard.tls: true
-      traefik.http.routers.nmdashboard.tls.certResolver: dns
+      traefik.http.routers.nmdashboard.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.services.nmdashboard.loadbalancer.server.port: 80
       
 
@@ -118,12 +118,11 @@ services:
       - {{ nm_traefik_network_name }}
     labels:
       traefik.enable: true
-      traefik.http.routers.broker.rule: Host(`nmbroker.{{ nm_domain }}`)
+      traefik.http.routers.broker.rule: Host(`{{ nm_broker_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.broker.entrypoints: websecure
       traefik.http.routers.broker.tls: true
-      traefik.http.routers.broker.tls.certResolver: dns
+      traefik.http.routers.broker.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.services.broker.loadbalancer.server.port: {{ nm_mq_port }}
-      traefik.http.services.broker.loadbalancer.server.scheme: wss
 
   turn:
     container_name: turn
@@ -141,13 +140,13 @@ services:
       traefik.http.routers.turn.rule: Host(`{{ nm_turn_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.turn.entrypoints: websecure
       traefik.http.routers.turn.tls: true
-      traefik.http.routers.turn.tls.certResolver: dns
+      traefik.http.routers.turn.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.routers.turn.service: turn
       traefik.http.services.turn.loadbalancer.server.port: {{ nm_turn_port }}
       traefik.http.routers.turnapi.rule: Host(`{{ nm_turnapi_subdomain }}.{{ nm_domain }}`)
       traefik.http.routers.turnapi.entrypoints: websecure
       traefik.http.routers.turnapi.tls: true
-      traefik.http.routers.turnapi.tls.certResolver: dns
+      traefik.http.routers.turnapi.tls.certResolver: {{ nm_cert_resolver }}
       traefik.http.routers.turnapi.service: turnapi
       traefik.http.services.turnapi.loadbalancer.server.port: {{ nm_turn_api_port }}
 
