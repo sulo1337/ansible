@@ -6,5 +6,7 @@
 - name: Uninstall traefik
   become: true
   hosts: netmaker_server
+  vars:
+    remove_volumes: false
   roles:
     - role: netmaker-traefik-docker/uninstall

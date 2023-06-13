@@ -6,5 +6,7 @@
 - name: Uninstall traefik
   become: true
   hosts: traefik_server
+  vars:
+    remove_volumes: false
   roles:
     - role: traefik-docker/uninstall

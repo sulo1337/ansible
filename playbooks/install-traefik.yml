@@ -6,5 +6,7 @@
 - name: Install traefik
   become: true
   hosts: traefik_server
+  vars:
+    force_recreate_containers: false
   roles:
     - role: traefik-docker/install

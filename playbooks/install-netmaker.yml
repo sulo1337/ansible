@@ -10,6 +10,7 @@
   vars:
     cert_resolver: dns-staging
     nm_cert_resolver: dns-staging
+    force_recreate_containers: false
   roles:
     # - role: traefik-docker/install
     - role: netmaker-traefik-docker/install
