@@ -15,3 +15,6 @@ ansible.log
 *.pyc
 # pyenv configuration
 .python-version
+
+# ansible collections
+galaxy/
