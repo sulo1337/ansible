@@ -1,8 +1,12 @@
 ---
   - name: Install node exporter
+    gather_facts: true
     hosts: all
     become: yes
+    vars:
+      prometheus_node_exporter_version: 1.6.0
+      prometheus_node_exporter_config_flags:
+        'web.listen-address': '127.0.0.1:9100'
+        'log.level': 'info'
     roles:
-      - role: install-node-exporter
-        node_exporter_version: 1.6.0
-      
+      - role: undergreen.prometheus-node-exporter

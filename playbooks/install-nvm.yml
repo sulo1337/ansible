@@ -1,6 +1,0 @@
----
-- name: Install nvm
-  hosts: all
-  become: yes
-  roles:
-    - role: install-nvm
