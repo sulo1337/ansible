@@ -28,4 +28,9 @@
     state: absent
   become: yes
   when: service_check.stat.exists == true
+
+- name: Remove /usr/local/bin/netclient
+  file:
+    path: /usr/local/bin/netclient
+    state: absent
 ...
