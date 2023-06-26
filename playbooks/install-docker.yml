@@ -1,6 +1,6 @@
 ---
 - name: Install Docker
-  hosts: traefik_server
+  hosts: master
   gather_facts: true
   become: yes
   vars:

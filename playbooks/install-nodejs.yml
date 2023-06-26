@@ -1,0 +1,12 @@
+
+---
+- name: Install nodejs
+  gather_facts: true
+  hosts: master
+  become: yes
+  vars:
+    nodejs_version: "16.x"
+    nodejs_install_npm_user: "{{ ansible_ssh_user }}"
+    npm_config_prefix: "/usr/local/lib/npm"
+  roles:
+    - geerlingguy.nodejs
