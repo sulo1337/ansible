@@ -5,11 +5,6 @@ public_key_path: ""
 public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDYOBxVbpUmuTekV26UWOkjxe23+1OcHwnSiUfCZ+88lPoH/CyxjGtM6UFVyzO6SNl4Ful9Nj8L+piHSL0siBHZqHr2CyEnALZFP0db0NqgpWXAQxtWQXcV9Hcb5NGwJsXwk6bqI4dq5p2KaLpVJUqTDTjAMICmDA+h5OvWPDkRtj3S+MLdQ4m5caKcDCW0pgN6s3JpjlpKL3KoUKKiwb+hklsFkvBwk4XusIYz9KzoM4DRBLYQmqEmd3LXsGu2IiFBneVqBRTLPaSPu+KsZ/ZimRQpNJa8hGI8g79NyNDoTea+T7WWTnvufbWTmwszx+UM1Y3iZtefKkK2r46SZQFxB426IBIMdUe9lCvPjPUvsPKJ/+XeiitVCJ+O77YBILH9tHyvdChdj+AobLMZ3i5SPi6Wt4eZXKEdk8lPel1EBE+znBfe7/xJGXqwhMfnKI7sp+EjZPSDSn8+JQrS69GkC7z5SpwODdM10F17FRbdeMH4mE89fzeqP8qaEScHnr8= sulochan@tickerwolf.com"
 # END ----- user setup variables
 
-# START ----- docker setup variables
-docker_user: user
-compose_version: "v2.18.1"
-# END ----- docker setup variables
-
 # START ----- traefik setup variables
 traefik_acme_http_email: email@domain.com
 traefik_acme_dns_email: email@domain.com
