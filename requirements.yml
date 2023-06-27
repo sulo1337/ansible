@@ -11,3 +11,5 @@ roles:
     version: 6.1.1
   - name: undergreen.prometheus-node-exporter
     version: v1.5.1
+  - name: robertdebock.fail2ban
+    version: 5.0.3
