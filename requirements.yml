@@ -21,3 +21,5 @@ roles:
     version: 5.1.6
   - name: robertdebock.hostname
     version: 3.1.7
+  - name: robertdebock.bootstrap
+    version: 6.1.6
