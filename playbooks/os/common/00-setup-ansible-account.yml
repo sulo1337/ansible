@@ -1,7 +1,11 @@
 ---
 # this playbook will add a user `tickerbot` in the system and allows sudo access with no password
 # to run this playbook, we need to have access to root account and password for root account
-# example run: ansible-playbook -i <inventory> playbooks/os/common/00-setup-ansible-user.yml --ask-pass
+# example run for single host: ansible-playbook -i <inventory> playbooks/os/common/00-setup-ansible-user.yml --ask-pass
+#
+# refer to this to find out how to insert password securely multiple hosts for the first time for root user:
+# https://stackoverflow.com/questions/59842933/how-to-define-sudo-passwords-for-multiple-hosts-in-one-file-vault
+#
 - name: Setup ansible account for management
   gather_facts: true
   hosts: all
