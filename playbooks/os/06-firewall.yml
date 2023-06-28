@@ -1,0 +1,13 @@
+---
+- name: Firewall Configuration
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    firewall_default_protocol: tcp
+    firewall_default_rule: allow
+    firewall_services:
+      - name: ssh
+
+  roles:
+    - role: robertdebock.firewall
