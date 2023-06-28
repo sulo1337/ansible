@@ -5,6 +5,10 @@
 ---
 - name: Set hostname
   become: true
+  gather_facts: true
   hosts: all
+  vars:
+    hostname: "{{ short_hostname }}"
+    hostname_reboot: yes
   roles:
-    - role: set-hostname
+    - role: robertdebock.hostname
