@@ -1,7 +1,7 @@
 ---
 - name: Setup default user accounts
   gather_facts: true
-  hosts: master
+  hosts: all
   become: true
   vars:
     users_group_list:
