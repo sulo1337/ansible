@@ -15,5 +15,5 @@ roles:
     version: 2.0.1
   - name: robertdebock.fail2ban
     version: 5.0.3
-  - name: singleplatform-eng.users
-    version: v1.2.6
+  - name: robertdebock.users
+    version: 5.6.0

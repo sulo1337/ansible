@@ -1,0 +1,24 @@
+---
+# this playbook will add a user `tickerbot` in the system and allows sudo access with no password
+# to run this playbook, we need to have access to root account and password for root account
+- name: Setup ansible account for management
+  gather_facts: true
+  hosts: master
+  become: true
+  remote_user: root
+  vars:
+    users_group_list:
+      - name: sysadmin
+        system: yes
+    users_user_list:
+      - name: tickerbot
+        comments: Ansible Automation User
+        uid: 1001
+        groups: sysadmin,sudo
+        cron_allow: yes
+        sudo_options: "ALL=(ALL) NOPASSWD: ALL"
+        authorized_keys:
+          - "https://gist.githubusercontent.com/tickerwolf/30c24afd625d14ca2124a3ab8924c8c9/raw/d18d61e43bd1f6f7883c6a195a23e98a64ac8c76/tickerbot_pubkey.pub"
+        expires: -1
+  roles:
+    - robertdebock.users
