@@ -18,7 +18,7 @@
 - name: Verify Docker Compose installation
   command: docker-compose --version
   register: compose_version_check
-  failed_when: compose_version not in compose_version_check.stdout
+  failed_when: docker_compose_version not in compose_version_check.stdout
 
 - name: Create directories for Traefik configuration
   file:

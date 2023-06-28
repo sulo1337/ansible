@@ -4,12 +4,12 @@
   gather_facts: true
   become: yes
   vars:
+    # docker_compose_version is picked up from group vars and not managed here
     docker_edition: 'ce'
     docker_service_manage: true
     docker_service_state: started
     docker_service_enabled: true
     docker_install_compose: true
-    docker_compose_version: "v2.19.0"
     docker_compose_arch: "{{ ansible_architecture }}"
     docker_compose_path: /usr/local/bin/docker-compose
     docker_users:

@@ -1,4 +1,8 @@
 ---
+# START ----- software versions
+docker_compose_version: "v2.19.0"
+# END ------ software versions
+
 # START ----- traefik setup variables
 traefik_acme_http_email: email@domain.com
 traefik_acme_dns_email: email@domain.com
