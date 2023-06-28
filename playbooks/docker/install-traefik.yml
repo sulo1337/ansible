@@ -8,5 +8,12 @@
   hosts: traefik_server
   vars:
     force_recreate_containers: false
+    # allow firewall for port 80 and 443
+    firewall_default_protocol: tcp
+    firewall_default_rule: allow
+    firewall_services:
+      - name: http
+      - name: https
   roles:
     - role: traefik-docker/install
+    - role: robertdebock.firewall

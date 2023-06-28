@@ -8,5 +8,13 @@
   hosts: traefik_server
   vars:
     remove_volumes: false
+    # deny firewall for port 80 and 443
+    firewall_default_protocol: tcp
+    firewall_services:
+      - name: http
+        state: absent
+      - name: https
+        state: absent
   roles:
     - role: traefik-docker/uninstall
+    - role: robertdebock.firewall
