@@ -14,4 +14,6 @@ roles:
   - name: geerlingguy.node_exporter
     version: 2.0.1
   - name: robertdebock.fail2ban
-    version: 5.0.3      
+    version: 5.0.3
+  - name: singleplatform-eng.users
+    version: v1.2.6
