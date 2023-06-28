@@ -1,6 +1,12 @@
 ---
 - name: Apt update and upgrade all packages
   hosts: all
-  roles:
-    - role: apt-update
-    - role: apt-upgrade
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Apt update
+      apt:
+        update_cache: yes
+    - name: Apt upgrade
+      apt:
+        upgrade: yes
