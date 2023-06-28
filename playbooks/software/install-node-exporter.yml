@@ -4,9 +4,11 @@
     hosts: all
     become: yes
     vars:
-      prometheus_node_exporter_version: 1.6.0
-      prometheus_node_exporter_config_flags:
-        'web.listen-address': '127.0.0.1:9100'
-        'log.level': 'info'
+      node_exporter_version: '1.6.0'
+      node_exporter_arch: " {{ ansible_architecture }} "
+      node_exporter_host: '127.0.0.1'
+      node_exporter_port: 9100
+      node_exporter_state: started
+      node_exporter_enabled: true
     roles:
-      - role: undergreen.prometheus-node-exporter
+      - role: geerlingguy.node_exporter

@@ -7,4 +7,3 @@
     - role: install-apt-package
       package_list:
         - "wireguard"
-        - "resolvconf"
