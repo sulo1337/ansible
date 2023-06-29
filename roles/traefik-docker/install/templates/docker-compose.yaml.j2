@@ -22,7 +22,7 @@ services:
       traefik.http.routers.traefik_dashboard.tls.certResolver: {{ cert_resolver }}
       traefik.http.routers.traefik_dashboard.service: api@internal
     networks:
-      - tickerwolf
+      - {{ traefik_network_name }}
 
 volumes:
   {{ traefik_ssl_cert_volume_name }}:

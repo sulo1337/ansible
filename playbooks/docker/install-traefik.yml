@@ -6,6 +6,7 @@
 - name: Install traefik
   become: true
   hosts: traefik_server
+  gather_facts: true
   vars:
     force_recreate_containers: false
     # allow firewall for port 80 and 443
