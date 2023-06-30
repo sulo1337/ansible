@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  adguard:
+    container_name: adguard
+    restart: always
+    volumes:
+      - 'adguard_data:/opt/adguardhome/work'
+      - '/etc/adguard/conf:/opt/adguardhome/conf'
+    labels:
+      traefik.enable: true
+      traefik.http.routers.adguard.rule: Host(`{{ adguard_fqdn }}`)
+      traefik.http.routers.adguard.entrypoints: websecure
+      traefik.http.routers.adguard.tls: true
+      traefik.http.routers.adguard.tls.certResolver: {{ adguard_cert_resolver }}
+      traefik.http.services.adguard.loadbalancer.server.port: 80
+    networks:
+      - {{ adguard_traefik_network_name }}
+    ports:
+      - '{{ adguard_dns_port }}:53/tcp'
+      - '{{ adguard_dns_port }}:53/udp'
+    image: adguard/adguardhome:{{ adguard_image_version }}
+
+volumes:
+  adguard_data:
+
+networks:
+  {{ adguard_traefik_network_name }}:
+    external: true

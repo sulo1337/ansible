@@ -1,0 +1,23 @@
+---
+- name: Stop adguard container
+  command: docker-compose down{{' -v' if remove_volumes else ''}}
+  args:
+    chdir: /etc/adguard
+  ignore_errors: true
+
+- name: Remove adguard configuration files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/adguard/AdGuardHome.yaml
+    - /etc/adguard/docker-compose.yaml
+  ignore_errors: true
+
+- name: Remove adguard configuration directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/adguard
+  ignore_errors: true

@@ -52,3 +52,13 @@ nc_version: v0.20.1
 nc_os_dist: linux
 nc_arch: amd64
 # END ----- netclient setup variables
+
+# START ---- adguard setup variables
+adguard_admin_user: admin
+adguard_admin_pw: <bcrypt-encrypted-pw>
+adguard_dns_port: 53
+adguard_fqdn: adguard-dashboard.example.com
+adguard_cert_resolver: dns-staging # one of http-staging,dns-staging,http,dns
+adguard_image_version: v0.108.0-b.38
+adguard_traefik_network_name: traefik_docker_network_to_connect_to
+# END ----- adguard setup variables

@@ -1,0 +1,16 @@
+---
+- name: Uninstall adguard
+  become: true
+  hosts: adguard_server
+  vars:
+    remove_volumes: false
+    firewall_services:
+      - name: 53
+        protocol: tcp
+        state: absent
+      - name: 53
+        protocol: udp
+        state: absent
+  roles:
+    - role: adguard-docker/uninstall
+    - role: robertdebock.firewall

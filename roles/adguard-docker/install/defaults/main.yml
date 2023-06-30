@@ -1,0 +1,9 @@
+---
+adguard_admin_user: admin
+adguard_admin_pw: $2a$12$DTJ21okYCYLPvFmxeRYBmuQTYIqEauHIlBkD42QltP9GJ43.fkRLS
+adguard_dns_port: 53
+adguard_dashboard_fqdn: adguard.example.org
+adguard_cert_resolver: dns-staging
+adguard_image_version: v0.107.32
+adguard_traefik_network_name: traefik_example_network
+force_recreate_containers: false
