@@ -1,3 +1,4 @@
+# Note that enabling/disabling firewall for dns is not in the scope of this playbook
 ---
 - name: Install adguard with docker
   gather_facts: true
@@ -11,12 +12,5 @@
     adguard_cert_resolver: dns
     adguard_image_version: v0.108.0-b.38
     adguard_traefik_network_name: traefik_tickernet_ansible_managed
-    firewall_services:
-      - name: 53
-        protocol: tcp
-      - name: 53
-        protocol: udp
-
   roles:
     - role: adguard-docker/install
-    - role: robertdebock.firewall
