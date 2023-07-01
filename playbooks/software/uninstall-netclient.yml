@@ -7,5 +7,11 @@
 - name: Uninstall netclient
   become: true
   hosts: vpn_clients
+  vars:
+    firewall_services:
+      - name: 51821
+        protocol: udp
+        state: absent
   roles:
     - role: netclient/uninstall
+    - role: robertdebock.firewall

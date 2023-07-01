@@ -7,5 +7,10 @@
 - name: Install netclient
   become: true
   hosts: vpn_clients
+  vars:
+    firewall_services:
+      - name: 51821
+        protocol: udp
   roles:
     - role: netclient/install
+    - role: robertdebock.firewall
