@@ -1,0 +1,7 @@
+---
+- name: Join Netmaker Server 
+  gather_facts: true
+  become: true
+  hosts: all
+  roles:
+    - role: netclient/join

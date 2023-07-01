@@ -1,0 +1,14 @@
+---
+- name: Check environment variable for netmaker join token
+  fail:
+    msg: "Environment variable NETMAKER_JOIN_TOKEN is not defined or empty"
+  when: lookup('env', 'NETMAKER_JOIN_TOKEN') == ''
+
+- name: Set netmaker join token from environment variable
+  set_fact:
+    netmaker_join_token: "{{ lookup('env', 'NETMAKER_JOIN_TOKEN') }}"
+  failed_when: netmaker_join_token is not defined
+
+- name: Join to netmaker server
+  command: netclient join -t {{ netmaker_join_token }}
+
