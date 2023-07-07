@@ -1,0 +1,16 @@
+---
+- name: Set DNS server
+  become: true
+  gather_facts: true
+  hosts: all
+  vars:
+    resolv_nameservers:
+      - "10.10.0.1"
+    resolv_domain: "tickerwolf.com"
+    resolv_search:
+      - "tickerwolf.com"
+    resolv_options:
+      - "timeout:2"
+      - "rotate"
+  roles:
+    - role: ahuffman.resolv
