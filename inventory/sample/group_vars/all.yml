@@ -1,4 +1,9 @@
 ---
+# START ----- ansible settings
+ansible_user: ansible_user
+ansible_ssh_private_key_file: /path/to/private/key
+# END ----- ansible settings
+
 # START ----- software versions
 docker_compose_version: "v2.19.0"
 # END ------ software versions
@@ -62,3 +67,15 @@ adguard_cert_resolver: dns-staging # one of http-staging,dns-staging,http,dns
 adguard_image_version: v0.108.0-b.38
 adguard_traefik_network_name: traefik_docker_network_to_connect_to
 # END ----- adguard setup variables
+
+# START ----- k3s setup variables
+k3s_version: v1.22.3+k3s1
+systemd_dir: /etc/systemd/system
+master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+extra_server_args: ""
+extra_agent_args: ""
+k3s_subnet: 192.168.0.0/24
+k3s_allow_subnets: 
+  - "{{ k3s_subnet }}"
+  - 10.0.0.0/24 # additional subnet to allow kubernetes api access from
+# END ----- k3s setup variables
