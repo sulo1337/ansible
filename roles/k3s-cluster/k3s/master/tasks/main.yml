@@ -1,23 +1,4 @@
 ---
-- name: Unblock necessary ports on master nodes to allow connections from k3s_cluster_subnet
-  community.general.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-    from_ip: "{{ k3s_cluster_subnet }}"
-  loop: 
-    - 6443
-    - 2379
-    - 2380
-      
-- name: Unblock port 6443 for allowed subnets to access kubernetes api server
-  community.general.ufw:
-    rule: allow
-    port: 6443
-    proto: tcp
-    from_ip: "{{ item }}"
-  loop: "{{ k3s_api_allow_subnets }}"
-
 - name: Clean previous runs of k3s-init
   systemd:
     name: k3s-init
@@ -169,3 +150,11 @@
     - "{{ k3s_server_manifests_directories.files }}"
   loop_control:
     label: "{{ item.path }}"
+
+- name: Allow api server access from additional subnets 
+  community.general.ufw:
+    rule: allow
+    direction: in
+    port: 6443
+    from_ip: "{{ item }}"
+  loop: "{{ k3s_api_allow_subnets }}"

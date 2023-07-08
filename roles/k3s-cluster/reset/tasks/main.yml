@@ -55,23 +55,29 @@
     path: /tmp/k3s
     state: absent
 
-- name: Block necessary ports on master nodes
+- name: DELETE EXISTING RULE - UFW Allow all traffic between nodes in the cluster
   community.general.ufw:
     rule: allow
-    port: "{{ item }}"
-    proto: tcp
+    direction: in
     delete: true
-    from_ip: "{{ k3s_cluster_subnet }}"
-  loop:
-    - 6443
-    - 2379
-    - 2380
-      
-- name: Block port 6443 from previously allowed subnets that had access to kubernetes api server
+    from_ip: "{{ hostvars[item].ansible_host }}"
+  loop: "{{ groups['k3s_cluster'] }}"
+
+- name: DELETE EXISTING RULE - Allow Flannel and CNI subnets
   community.general.ufw:
     rule: allow
+    direction: in
+    delete: true
+    from_ip: "{{ item }}"
+  loop:
+    - 10.42.0.0/16
+    - 10.43.0.0/16
+
+- name: DELETE EXISTING RULE - Allow api server access from additional subnets 
+  community.general.ufw:
+    rule: allow
+    direction: in
     port: 6443
-    proto: tcp
     delete: true
     from_ip: "{{ item }}"
   loop: "{{ k3s_api_allow_subnets }}"
