@@ -1,0 +1,9 @@
+---
+proxmox_vm_defaults:
+  node: "your-node-name"
+  clone: "your-cloud-init-image-name"
+  cores: 2
+  sockets: 1
+  memory: 2048
+  disksize: "5G"
+  ipaddress: "dhcp"

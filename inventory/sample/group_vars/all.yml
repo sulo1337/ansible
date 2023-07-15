@@ -90,3 +90,19 @@ extra_server_args: >-
 extra_agent_args: >-
   {{ extra_args }}
 # END ----- k3s setup variables
+
+# START ----- proxmox vm creation variables
+proxmox: 
+  api_user: "root@pam" # provide a user with permissions to create VMs
+  api_password: "some-password" # provide the password for the user
+  api_host: "your-proxmox-hostname" # provide the hostname of the proxmox server
+proxmox_vm_defaults:
+  node: "pldalprodhypvis01" # proxmox node to create VMs on
+  clone: "ubuntu-cloud" # cloud-init image to clone from
+  cores: 2 # number of cores
+  sockets: 1  # number of sockets
+  memory: 2048 # memory in MB
+  disksize: "5G" # disk size in GB
+  ipaddress: "dhcp" # ip address of VM, static or dhcp
+  gateway: "10.0.0.1/24" # gateway of VM
+# END ----- proxmox vm creation variables

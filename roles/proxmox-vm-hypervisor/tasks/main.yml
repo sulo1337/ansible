@@ -1,0 +1,110 @@
+---
+# Prerequisite: Should have a cloud-init image ready!
+- name: Install dependencies
+  include_role:
+    name: geerlingguy.pip
+  vars:
+    pip_package: python3-pip
+    pip_install_packages:
+      - name: proxmoxer
+        version: 1.0.3
+  tags:
+    - always
+
+- name: Clone VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    node: "{{ item.value.node | default(proxmox_vm_defaults.node) }}"
+    name: "{{ item.key }}"
+    newid: "{{ item.value.vmid }}"
+    clone: "{{ item.value.clone | default(proxmox_vm_defaults.clone) }}"
+    full: yes
+    format: unspecified
+    timeout: 300
+  with_dict: "{{ vms }}"
+  tags:
+    - create
+
+- name: Update VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    cores: "{{ item.value.cores | default(proxmox_vm_defaults.cores) }}"
+    sockets: "{{ item.value.sockets | default(proxmox_vm_defaults.sockets) }}"
+    memory: "{{ item.value.memory | default(proxmox_vm_defaults.memory) }}"
+    update: yes
+    vmid: "{{ item.value.vmid }}"
+    node: "{{ item.value.node | default(proxmox_vm_defaults.node) }}"
+    name: "{{ item.key }}"
+    boot: "dc"
+    bootdisk: scsi0
+    net:
+      net0: "virtio,bridge=vmbr0"
+      net1: "virtio,bridge=vmbr1"
+    ipconfig:
+      ipconfig0: "{% if (item.value.ipaddress0 is undefined or item.value.ipaddress0=='dhcp') %}ip=dhcp{% else %}ip={{ item.value.ipaddress0}},gw={{ item.value.gateway0 }}{% endif %}"
+      ipconfig1: "{% if (item.value.ipaddress1 is undefined or item.value.ipaddress1=='dhcp') %}ip=dhcp{% else %}ip={{ item.value.ipaddress1}},gw={{ item.value.gateway1 }}{% endif %}"
+  with_dict: "{{ vms }}"
+  tags:
+    - update
+
+- name: Update Disk Size
+  ansible.builtin.command:
+    cmd: "qm resize {{ item.value.vmid }} scsi0 {{ item.value.disksize | default(proxmox_vm_defaults.disksize) }}"
+  with_dict: "{{ vms }}"
+  tags:
+    - update
+
+- name: Start VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    vmid: "{{ item.value.vmid }}"
+    node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
+    state: started
+  with_dict: "{{ vms }}"
+  tags:
+    - start
+
+- name: Stop VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    vmid: "{{ item.value.vmid }}"
+    node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
+    state: stopped
+    timeout: 20
+  with_dict: " {{ vms }} "
+  ignore_errors: true
+  tags:
+    - never
+    - stop
+    - delete
+
+- name: Confirm Delete VMs
+  pause:
+    prompt: "Are you sure you want to delete VM with ID: {{ item.value.vmid }}?. Press 'return' to continue. Press Ctrl+C and then 'a' to abort."
+  with_dict: " {{ vms }} "
+  tags:
+    - never
+    - delete
+
+- name: Delete VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    vmid: "{{ item.value.vmid }}"
+    node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
+    state: absent
+    timeout: 20
+  with_dict: " {{ vms }} "
+  ignore_errors: true
+  tags:
+    - never
+    - delete
