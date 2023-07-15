@@ -11,3 +11,9 @@
 
   roles:
     - role: robertdebock.firewall
+  tasks:
+    - name: Allow SSH
+      community.general.ufw:
+        rule: allow
+        direction: in
+        port: 22

@@ -43,10 +43,8 @@
     bootdisk: scsi0
     net:
       net0: "virtio,bridge=vmbr0"
-      net1: "virtio,bridge=vmbr1"
     ipconfig:
       ipconfig0: "{% if (item.value.ipaddress0 is undefined or item.value.ipaddress0=='dhcp') %}ip=dhcp{% else %}ip={{ item.value.ipaddress0}},gw={{ item.value.gateway0 }}{% endif %}"
-      ipconfig1: "{% if (item.value.ipaddress1 is undefined or item.value.ipaddress1=='dhcp') %}ip=dhcp{% else %}ip={{ item.value.ipaddress1}},gw={{ item.value.gateway1 }}{% endif %}"
   with_dict: "{{ vms }}"
   tags:
     - update
