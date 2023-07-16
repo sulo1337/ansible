@@ -3,6 +3,7 @@
 - name: Create VM from cloud-init image 
   gather_facts: true 
   hosts: proxmox_hypervisor
+  become: true
   roles:
     - role: proxmox-vm-hypervisor
       vms:
