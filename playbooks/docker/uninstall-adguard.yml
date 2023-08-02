@@ -6,17 +6,3 @@
     remove_volumes: false
   roles:
     - role: adguard-docker/uninstall
-
-  tasks:
-    - name: DELETE EXISTING RULE - UFW Allow DNS queries from private CIDR
-      community.general.ufw:
-        rule: allow
-        direction: in
-        port: 53
-        delete: true
-        from_ip: "{{ item }}"
-      loop:
-        - 10.0.0.0/8
-        - 172.16.0.0/12
-        - 192.168.0.0/16
-        - 127.0.0.0/8

@@ -16,8 +16,9 @@ services:
     networks:
       - {{ adguard_traefik_network_name }}
     ports:
-      - '{{ adguard_dns_port }}:53/tcp'
-      - '{{ adguard_dns_port }}:53/udp'
+{% for port_mapping in adguard_port_mappings %}
+      - {{ port_mapping }}  
+{% endfor %}
     image: adguard/adguardhome:{{ adguard_image_version }}
 
 volumes:

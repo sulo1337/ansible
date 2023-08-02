@@ -11,19 +11,12 @@
     adguard_cert_resolver: dns
     adguard_image_version: v0.108.0-b.38
     adguard_traefik_network_name: traefik_tickernet_ansible_managed
+    adguard_port_mappings:
+      - '127.0.0.1:53:53/tcp'
+      - '127.0.0.1:53:53/udp'
+      # allow access from private network
+      - '10.0.0.1:53:53/tcp'
+      - '10.0.0.1:53:53/udp'
 
   roles:
     - role: adguard-docker/install
-
-  tasks:
-    - name: UFW Allow DNS queries from private CIDR
-      community.general.ufw:
-        rule: allow
-        direction: in
-        port: 53
-        from_ip: "{{ item }}"
-      loop:
-        - 10.0.0.0/8
-        - 172.16.0.0/12
-        - 192.168.0.0/16
-        - 127.0.0.0/8
