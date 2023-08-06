@@ -7,6 +7,7 @@
 - name: Uninstall netclient
   become: true
   hosts: vpn_clients
+  gather_facts: true
   vars:
     firewall_services:
       - name: 51821
