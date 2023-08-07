@@ -6,9 +6,19 @@
     vars:
       node_exporter_version: '1.6.0'
       node_exporter_arch: 'amd64' 
-      node_exporter_host: '127.0.0.1'
+      node_exporter_host: '0.0.0.0'
       node_exporter_port: 9100
       node_exporter_state: started
       node_exporter_enabled: true
     roles:
       - role: geerlingguy.node_exporter
+    
+    tasks:
+      - name: Allow UFW port 9100
+        community.general.ufw:
+          rule: allow
+          port: 9100
+          proto: tcp
+          from_ip: 10.0.0.0/16
+        tags:
+          - firewall
