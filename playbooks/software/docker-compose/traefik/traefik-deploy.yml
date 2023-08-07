@@ -1,0 +1,30 @@
+---
+- name: Traefik deploy docker-compose
+  hosts: traefik_server
+  gather_facts: true
+  become: true
+  vars:
+    # traefik specific vars
+    traefik_acme_http_email: admin@tickerwolf.com
+    traefik_acme_dns_email: admin@tickerwolf.com
+    traefik_image_version: v2.9.9
+    traefik_ssl_cert_volume_name: traefik_ssl_certs
+    traefik_fqdn: traefik.tickerwolf.com
+    traefik_network_name: tickernet_ansible_managed
+    cert_resolver: dns # one of http-staging,dns-staging,http,dns
+    # docker-compose-deploy specific vars
+    docker_compose_template: "templates/docker-compose.yaml.j2"
+    docker_compose_config_dir: /opt/ansible/docker-compose-apps/traefik
+    force_recreate_containers: false
+    remove_volumes: false
+    additional_templates: 
+      - "templates/traefik.yaml"
+    required_envars:
+      - "CLOUDFLARE_DNS_API_TOKEN"
+    traefik_port_mappings:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+      - "10.0.0.1:80:80"
+      - "10.0.0.1:443:443"
+  roles:
+    - role: docker-compose-deploy

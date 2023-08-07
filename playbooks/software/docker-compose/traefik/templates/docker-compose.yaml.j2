@@ -8,10 +8,11 @@ services:
     environment:
       - CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN
     ports:
-      - "80:80"
-      - "443:443"
+{% for port_mapping in traefik_port_mappings %}
+      - {{ port_mapping }}  
+{% endfor %}
     volumes:
-      - /etc/traefik:/etc/traefik
+      - {{ docker_compose_config_dir }}/traefik.yaml:/etc/traefik/traefik.yaml
       - {{ traefik_ssl_cert_volume_name }}:/ssl-certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
@@ -21,11 +22,14 @@ services:
       traefik.http.routers.traefik_dashboard.tls: true
       traefik.http.routers.traefik_dashboard.tls.certResolver: {{ cert_resolver }}
       traefik.http.routers.traefik_dashboard.service: api@internal
+      traefik.http.routers.traefik_dashboard.middlewares: private_svc@file
     networks:
       - {{ traefik_network_name }}
 
 volumes:
   {{ traefik_ssl_cert_volume_name }}:
+    external:
+      name: {{ traefik_ssl_cert_volume_name }}
 
 networks:
   {{ traefik_network_name }}:

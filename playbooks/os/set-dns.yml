@@ -6,6 +6,9 @@
   vars:
     resolv_nameservers:
       - "10.0.0.1"
+      - "1.1.1.1"
+      - "8.8.8.8"
+      - "8.8.4.4"
     resolv_domain: "tickerwolf.com"
     resolv_search:
       - "tickerwolf.com"

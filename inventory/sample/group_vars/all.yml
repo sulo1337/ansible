@@ -8,16 +8,6 @@ ansible_ssh_private_key_file: /path/to/private/key
 docker_compose_version: "v2.19.0"
 # END ------ software versions
 
-# START ----- traefik setup variables
-traefik_acme_http_email: email@domain.com
-traefik_acme_dns_email: email@domain.com
-traefik_image_version: v2.10.1
-traefik_ssl_cert_volume_name: ssl_certs
-traefik_fqdn: traefik.some_domain.com
-traefik_network_name: traefik_net
-cert_resolver: dns-staging # one of http-staging,dns-staging,http,dns
-# END ----- traefik setup variables
-
 # START ----- netmaker setup variables
 nm_image_version: v0.20.1
 nm_mosquitto_image_version: 2.0.15-openssl

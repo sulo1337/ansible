@@ -1,8 +1,0 @@
----
-- name: Uninstall adguard
-  become: true
-  hosts: adguard_server
-  vars:
-    remove_volumes: false
-  roles:
-    - role: adguard-docker/uninstall
