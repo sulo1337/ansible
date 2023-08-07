@@ -28,3 +28,30 @@
       - "10.0.0.1:443:443"
   roles:
     - role: docker-compose-deploy
+  
+  tasks:
+    # need to allow traefik services from docker network because ufw will block it by default
+    - name: Allow traefik services from docker network 
+      community.general.ufw:
+        rule: allow
+        direction: in
+        port: "{{ item }}"
+        from_ip: 172.16.0.0/12
+      loop:
+        - 80
+        - 443
+
+    - name: DELETE EXISTING RULE - Allow traefik services from docker network 
+      community.general.ufw:
+        rule: allow
+        direction: in
+        delete: true
+        port: "{{ item }}"
+        from_ip: 172.16.0.0/12
+      loop:
+        - 80
+        - 443
+      tags: 
+        - never
+        - down
+        - uninstall

@@ -26,3 +26,24 @@
       - "templates/AdGuardHome.yaml"
   roles:
     - role: docker-compose-deploy
+
+  tasks:
+    # need to allow DNS queries from docker network because ufw will block it by default
+    - name: Allow DNS queries from docker network 
+      community.general.ufw:
+        rule: allow
+        direction: in
+        port: 53
+        from_ip: 172.16.0.0/12
+
+    - name: DELETE EXISTING RULE - Allow DNS queries from docker network 
+      community.general.ufw:
+        rule: allow
+        direction: in
+        port: 53
+        from_ip: 172.16.0.0/12
+        delete: true
+      tags:
+        - never 
+        - down
+        - uninstall
