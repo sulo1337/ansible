@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:{{ prometheus_version }}
+    container_name: prometheus
+    restart: always
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - prometheus_data:/prometheus
+      - {{ docker_compose_config_dir }}/node_metrics.json:/etc/prometheus/targets/node_metrics.json
+      - {{ docker_compose_config_dir }}/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - {{ prometheus_traefik_network_name }}
+    labels:
+      traefik.enable: true
+      traefik.http.services.prometheus.loadbalancer.server.port: 9090
+      traefik.http.routers.prometheus.service: prometheus
+      traefik.http.routers.prometheus.rule: Host(`{{ prometheus_fqdn }}`)
+      traefik.http.routers.prometheus.entrypoints: websecure
+      traefik.http.routers.prometheus.tls: true
+      traefik.http.routers.prometheus.tls.certResolver: {{ prometheus_cert_resolver }}
+      traefik.http.routers.prometheus.middlewares: private_svc@file
+
+volumes:
+  prometheus_data:
+    external: true
+
+networks:
+  {{ prometheus_traefik_network_name }}:
+    external: true

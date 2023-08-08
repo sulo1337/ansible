@@ -1,0 +1,27 @@
+[
+    {
+      "targets": [
+        "vlchicprodsrv00.tickerwolf.com:9100",
+        "vlchicprodsrv01.tickerwolf.com:9100",
+        "vlchicprodsrv02.tickerwolf.com:9100",
+        "vlchicprodsrv03.tickerwolf.com:9100",
+        "pldalprodhypvis01.tickerwolf.com:9100",
+        "pldalprodops01.tickerwolf.com:9100"
+      ],
+      "labels": {
+        "env": "prod",
+        "job": "node_metrics"
+      }
+    },
+    {
+        "targets": [
+            "vldalstagsrv01.tickerwolf.com:9100",
+            "vldalstagsrv02.tickerwolf.com:9100",
+            "vldalstagsrv03.tickerwolf.com:9100"
+        ],
+        "labels": {
+          "env": "stag",
+          "job": "node_metrics"
+        }
+    }
+  ]

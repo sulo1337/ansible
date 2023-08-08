@@ -1,0 +1,18 @@
+global:
+  scrape_interval: {{ prometheus_scrape_interval }}
+  evaluation_interval: {{ prometheus_evaluation_interval }}
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["prometheus.tickerwolf.com"]
+
+  - job_name: "node_metrics"
+    file_sd_configs:
+        - files:
+            - /etc/prometheus/targets/node_metrics.json

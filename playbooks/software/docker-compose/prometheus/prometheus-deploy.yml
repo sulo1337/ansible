@@ -1,0 +1,23 @@
+---
+- name: Prometheus deploy docker-compose
+  hosts: prometheus_server
+  gather_facts: true
+  become: true
+  vars:
+    # prometheus specific vars
+    prometheus_scrape_interval: 5s
+    prometheus_evaluation_interval: 15s
+    prometheus_version: v2.46.0
+    prometheus_fqdn: prometheus.tickerwolf.com
+    prometheus_traefik_network_name: traefik_tickernet_ansible_managed
+    prometheus_cert_resolver: dns
+    # docker-compose-deploy specific vars
+    docker_compose_template: "templates/docker-compose.yaml.j2"
+    docker_compose_config_dir: /opt/ansible/docker-compose-apps/prometheus
+    force_recreate_containers: false
+    remove_volumes: false
+    additional_templates: 
+      - "templates/prometheus.yml"
+      - "templates/node_metrics.json"
+  roles:
+    - role: docker-compose-deploy
