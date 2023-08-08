@@ -4,6 +4,9 @@
       - docker_compose_template is defined
     fail_msg: "docker_compose_template variable is not defined"
   when: docker_compose_template is not defined
+  tags:
+    - all 
+    - restart
 
 - name: Build environment variables dict from envars
   ansible.builtin.set_fact:
@@ -13,6 +16,7 @@
   tags:
     - all
     - up
+    - restart
 
 - name: Scan for required_envars and build environment variables dict
   ansible.builtin.set_fact:
@@ -23,6 +27,7 @@
   tags:
     - all
     - up
+    - restart
 
 - name: Verify required environment variables are set
   assert:
@@ -32,23 +37,33 @@
   tags:
     - all
     - up
+    - restart
 
 - name: Verify docker installation
   service:
     name: docker
     state: started
     enabled: yes
+  tags:
+    - all 
+    - restart
 
 - name: Get docker-compose version 
   command: docker-compose --version 
   register: docker_compose_version_result 
   changed_when: false 
   ignore_errors: true
+  tags:
+    - all 
+    - restart
 
 - name: Parse docker-compose version 
   set_fact:
     docker_compose_version: " {{ docker_compose_version_result.stdout | regex_search('(\\d+)') | first | trim }} "
   when: docker_compose_version_result is success
+  tags:
+    - all 
+    - restart
 
 - name: Assert docker-compose major version is 2
   assert:
@@ -56,16 +71,25 @@
       - docker_compose_version == ' 2 '
     fail_msg: "The installed docker-compose version ({{ docker_compose_version }}) is not 2.x"
   when: docker_compose_version_result is success 
+  tags:
+    - all 
+    - restart
 
 - name: Make sure docker-compose config dir is present
   file:
     path: "{{ docker_compose_config_dir }}"
     state: directory
+  tags:
+    - all 
+    - restart
 
 - name: Copy docker-compose file from docker_compose_template variable
   template:
     src: "{{ docker_compose_template }}"
     dest: "{{ docker_compose_config_dir }}/docker-compose.yaml"
+  tags:
+    - all 
+    - restart
 
 - name: Copy additional templates
   template:
@@ -73,6 +97,9 @@
     dest: "{{ docker_compose_config_dir }}/"
     mode: 0644
   loop: "{{ additional_templates }}"
+  tags:
+    - all 
+    - restart
 
 - name: Bring services up
   shell: docker-compose up -d{{' --force-recreate' if force_recreate_containers else ''}}
@@ -82,6 +109,15 @@
   tags:
     - all
     - up
+
+- name: Restart services
+  shell: docker-compose restart
+  args: 
+    chdir: "{{ docker_compose_config_dir }}"
+  environment: "{{ docker_envars|default({}) }}"
+  tags:
+    - never
+    - restart
 
 - name: Bring services down
   command: docker-compose down{{' -v' if remove_volumes else ''}}
