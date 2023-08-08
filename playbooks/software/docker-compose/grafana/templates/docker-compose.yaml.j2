@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  grafana:
+    image: grafana/grafana:{{ grafana_version }}
+    container_name: grafana
+    restart: always
+    environment:
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    networks:
+      - {{ grafana_traefik_network_name }}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      traefik.enable: true
+      traefik.http.services.grafana.loadbalancer.server.port: 3000
+      traefik.http.routers.grafana.service: grafana
+      traefik.http.routers.grafana.rule: Host(`{{ grafana_fqdn }}`)
+      traefik.http.routers.grafana.entrypoints: websecure
+      traefik.http.routers.grafana.tls: true
+      traefik.http.routers.grafana.tls.certResolver: {{ grafana_cert_resolver }}
+      traefik.http.routers.grafana.middlewares: private_svc@file
+      
+volumes:
+  grafana_data:
+    external: true
+
+networks:
+  {{ grafana_traefik_network_name }}:
+    external: true

@@ -1,0 +1,18 @@
+---
+- name: Grafana deploy docker-compose
+  hosts: grafana_server
+  gather_facts: true
+  become: true
+  vars:
+    # grafana specific vars
+    grafana_version: 10.0.3-ubuntu
+    grafana_traefik_network_name: traefik_tickernet_ansible_managed
+    grafana_fqdn: grafana.tickerwolf.com
+    grafana_cert_resolver: dns
+    # docker-compose-deploy specific vars
+    docker_compose_template: "templates/docker-compose.yaml.j2"
+    docker_compose_config_dir: /opt/ansible/docker-compose-apps/grafana
+    force_recreate_containers: false
+    remove_volumes: false
+  roles:
+    - role: docker-compose-deploy
