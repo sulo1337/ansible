@@ -5,7 +5,7 @@
   become: true
   vars:
     # prometheus specific vars
-    prometheus_scrape_interval: 5s
+    prometheus_scrape_interval: 15s
     prometheus_evaluation_interval: 15s
     prometheus_version: v2.46.0
     prometheus_fqdn: prometheus.tickerwolf.com
