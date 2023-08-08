@@ -1,0 +1,14 @@
+---
+- name: Restart netclient service 
+  gather_facts: true 
+  hosts: all
+  become: true 
+  tasks: 
+    - name: Restart netclient systemd service 
+      systemd: 
+        name: netclient 
+        state: restarted 
+        daemon_reload: yes 
+        enabled: yes 
+        masked: no 
+        no_block: yes
