@@ -40,6 +40,9 @@
       loop:
         - 80
         - 443
+      tags:
+        - all 
+        - up
 
     - name: DELETE EXISTING RULE - Allow traefik services from docker network 
       community.general.ufw:
