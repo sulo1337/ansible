@@ -12,6 +12,7 @@
     adguard_cert_resolver: dns
     adguard_image_version: v0.108.0-b.38
     adguard_traefik_network_name: traefik_tickernet_ansible_managed
+    adguard_upstream_dns: https://dns.nextdns.io/4beb26
     adguard_port_mappings:
       - '127.0.0.1:53:53/tcp'
       - '127.0.0.1:53:53/udp'
