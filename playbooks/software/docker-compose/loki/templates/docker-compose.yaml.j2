@@ -1,0 +1,28 @@
+version: '3'
+services:
+  loki:
+    container_name: loki
+    image: grafana/loki:{{ loki_version }}
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - {{ docker_compose_config_dir }}/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - {{ loki_traefik_network_name }}
+    labels:
+      traefik.enable: true
+      traefik.http.services.loki.loadbalancer.server.port: 3100
+      traefik.http.routers.loki.service: loki
+      traefik.http.routers.loki.rule: Host(`{{ loki_fqdn }}`)
+      traefik.http.routers.loki.entrypoints: websecure
+      traefik.http.routers.loki.tls: true
+      traefik.http.routers.loki.tls.certResolver: {{ loki_cert_resolver }}
+      traefik.http.routers.loki.middlewares: private_svc@file
+
+networks:
+  {{ loki_traefik_network_name }}:
+    external: true
+
+volumes:
+  loki_data:
+    external: true
