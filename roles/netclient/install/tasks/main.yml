@@ -14,7 +14,7 @@
         mode: '0755'
     - name: Install netclient
       command: /usr/local/bin/netclient install
-      become: yes
+      become: true
   when: netclient_check.rc != 0
 
 - name: Ensure netclient.service is running
