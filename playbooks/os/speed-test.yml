@@ -1,0 +1,17 @@
+---
+- name: Internet speed test
+  hosts: all
+  tasks:
+    - name: Install speedtest-cli
+      apt:
+        name: speedtest-cli
+        state: present
+      become: yes
+
+    - name: Run speedtest
+      command: speedtest-cli --simple
+      register: speedtest
+
+    - name: Show speedtest results
+      debug:
+        msg: "{{ speedtest.stdout }}"
