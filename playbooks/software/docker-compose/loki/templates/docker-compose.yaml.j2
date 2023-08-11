@@ -4,6 +4,7 @@ services:
     container_name: loki
     image: grafana/loki:{{ loki_version }}
     command: -config.file=/etc/loki/local-config.yaml
+    restart: always
     volumes:
       - {{ docker_compose_config_dir }}/loki-config.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki
