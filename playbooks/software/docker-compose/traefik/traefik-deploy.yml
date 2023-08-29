@@ -7,9 +7,9 @@
     # traefik specific vars
     traefik_acme_http_email: admin@tickerwolf.com
     traefik_acme_dns_email: admin@tickerwolf.com
-    traefik_image_version: v2.9.9
+    traefik_image_version: v2.10.4
     traefik_ssl_cert_volume_name: traefik_ssl_certs
-    traefik_fqdn: traefik.tickerwolf.com
+    traefik_fqdn: traefik-srv01.tickerwolf.com
     traefik_network_name: tickernet_ansible_managed
     cert_resolver: dns # one of http-staging,dns-staging,http,dns
     # docker-compose-deploy specific vars
@@ -26,6 +26,8 @@
       - "127.0.0.1:443:443"
       - "10.0.0.1:80:80"
       - "10.0.0.1:443:443"
+      # expose traefik to public internet
+      # - "0.0.0.0:443:443"
   roles:
     - role: docker-compose-deploy
   
