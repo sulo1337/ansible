@@ -1,0 +1,22 @@
+---
+- name: Set netplan for private network
+  hosts: hosthatch
+  gather_facts: true
+  become: true
+  any_errors_fatal: true
+  roles:
+    - role: mrlesmithjr.netplan
+      netplan_enabled: true
+      netplan_config_file: /etc/netplan/90-private.yaml
+      netplan_renderer: networkd
+      netplan_configuration:
+        network:
+          version: 2
+          ethernets:
+            ens3:
+              dhcp4: true
+            ens4:
+              addresses:
+                - "{{ hosthatch_private_ip }}"
+              match:
+                macaddress: "{{ ansible_facts['ens4']['macaddress'] }}"

@@ -1,6 +1,6 @@
 ---
 - name: Reboot hosts
-  hosts: vpn_clients
+  hosts: all
   tasks:
     - name: Reboot the host
       become: yes
