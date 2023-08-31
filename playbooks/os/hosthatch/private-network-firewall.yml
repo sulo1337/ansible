@@ -1,0 +1,10 @@
+---
+- name: Firewall Configuration for Hosthatch vps
+  hosts: hosthatch
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Allow everything from private network
+      community.general.ufw:
+        rule: allow
+        src: 192.168.40.0/24

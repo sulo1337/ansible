@@ -4,6 +4,17 @@
   become: true
   gather_facts: true
   tasks:
+    - name: Ensure UFW is enabled and running
+      community.general.ufw:
+        state: enabled
+        policy: deny
+    
+    - name: Start UFW and enable on boot
+      service:
+        name: ufw
+        state: started
+        enabled: true
+        
     - name: Allow SSH
       community.general.ufw:
         rule: allow
