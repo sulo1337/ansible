@@ -1,0 +1,21 @@
+---
+- name: Tailscale install and join
+  hosts: vpn_clients
+  gather_facts: true
+  become: true
+  roles:
+    - role: artis3n.tailscale
+      vars:
+        tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"
+    - role: artis3n.tailscale
+      vars:
+        tailscale_up_skip: true
+      tags:
+        - never
+        - only_install
+    - role: artis3n.tailscale
+      vars:
+        state: absent
+      tags:
+        - never
+        - uninstall
