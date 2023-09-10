@@ -59,6 +59,10 @@ providers:
     watch: true
 
 http:
+  # to ignore backend servers' self-signed certs if proxying https
+  serversTransports:
+    ignorecert:
+      insecureSkipVerify: true
   middlewares:
     public_svc:
       ipWhiteList:
@@ -67,6 +71,7 @@ http:
     private_svc: 
       ipWhiteList:
         sourceRange:
+          - "100.64.0.0/10"
           - "127.0.0.0/8"
           - "10.0.0.0/8"
           - "172.16.0.0/12"
