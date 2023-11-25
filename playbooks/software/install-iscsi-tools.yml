@@ -1,0 +1,23 @@
+---
+- name: Install iscsi tools
+  become: yes
+  hosts: all
+  roles:
+    - role: install-apt-package
+      package_list:
+        - "nfs-common"
+        - "open-iscsi"
+        - "multipath-tools"
+        - "scsitools"
+        - "lsscsi"
+
+  tasks:
+    - name: Restart iscsi
+      ansible.builtin.service:
+        name: iscsid
+        state: restarted
+
+    - name: Restart multipath
+      ansible.builtin.service:
+        name: multipath-tools
+        state: restarted

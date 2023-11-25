@@ -37,3 +37,6 @@ roles:
     version: v0.3.0
   - name: artis3n.tailscale
     version: v4.2.2
+  - name: idiv_biodiversity.systemd_resolved
+    src: https://github.com/idiv-biodiversity/ansible-role-systemd-resolved
+    version: v1.2.0    
