@@ -7,10 +7,12 @@
     # traefik specific vars
     traefik_acme_http_email: admin@tickerwolf.com
     traefik_acme_dns_email: admin@tickerwolf.com
-    traefik_image_version: v2.10.4
+    traefik_image_version: v2.10.7
     traefik_ssl_cert_volume_name: traefik_ssl_certs
     traefik_fqdn: traefik-srv01.tickerwolf.com
     traefik_network_name: tickernet_ansible_managed
+    traefik_log_level: ERROR # one of ERROR, INFO, DEBUG
+    traefik_acme_dns_resolver: 1.1.1.1:53
     cert_resolver: dns # one of http-staging,dns-staging,http,dns
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"

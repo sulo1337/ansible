@@ -2,6 +2,9 @@ global:
   checkNewVersion: true
   sendAnonymousUsage: false # true by default
 
+log:
+  level: {{ traefik_log_level }}
+
 api:
   dashboard: true
   insecure: false
@@ -34,6 +37,8 @@ certificatesResolvers:
       caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: cloudflare
+        resolvers: 
+          - {{ traefik_acme_dns_resolver }}
 
   http:
     acme:
@@ -50,6 +55,8 @@ certificatesResolvers:
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: cloudflare
+        resolvers: 
+          - {{ traefik_acme_dns_resolver }}
 
 providers:
   docker:
@@ -67,6 +74,7 @@ http:
     private_svc: 
       ipWhiteList:
         sourceRange:
+          - "100.64.0.0/10"
           - "127.0.0.0/8"
           - "10.0.0.0/8"
           - "172.16.0.0/12"
