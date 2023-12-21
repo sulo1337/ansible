@@ -1,0 +1,22 @@
+---
+- name: Nextcloud deploy docker-compose
+  hosts: nextcloud_server
+  gather_facts: true
+  become: true
+  vars:
+    # nextcloud specific vars
+    nextcloud_fqdn: nextcloud.saugatshrestha.com
+    nextcloud_traefik_network_name: traefik_saugat_ansible_managed
+    nextcloud_cert_resolver: dns
+    nextcloud_version: 27.0.2-ls269
+    mariadb_version: 10.11.5
+    nextcloud_config_dir: /data/nextcloud/config
+    nextcloud_data_dir: /data/nextcloud/data
+    nextcloud_mariadb_data_dir: /data/nextcloud/mariadb_data
+    # docker-compose-deploy specific vars
+    docker_compose_template: "templates/docker-compose.yaml.j2"
+    docker_compose_config_dir: /opt/ansible/docker-compose-apps/nextcloud
+    force_recreate_containers: false
+    remove_volumes: false
+  roles:
+    - role: docker-compose-deploy

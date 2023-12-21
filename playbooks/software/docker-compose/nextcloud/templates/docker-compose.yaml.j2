@@ -1,0 +1,49 @@
+---
+version: "2.1"
+services:
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud:{{ nextcloud_version }}
+    container_name: nextcloud
+    networks:
+      - {{ nextcloud_traefik_network_name }}
+    environment:
+      - PUID=1024
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - {{ nextcloud_config_dir }}:/config
+      - {{ nextcloud_data_dir }}:/data
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.services.nextcloud.loadbalancer.server.port: 443
+      traefik.http.services.nextcloud.loadbalancer.serverstransport: ignorecert@file
+      traefik.http.services.nextcloud.loadbalancer.server.scheme: https
+      traefik.http.routers.nextcloud.service: nextcloud
+      traefik.http.routers.nextcloud.rule: Host(`{{ nextcloud_fqdn }}`)
+      traefik.http.routers.nextcloud.entrypoints: websecure
+      traefik.http.routers.nextcloud.tls: true
+      traefik.http.routers.nextcloud.tls.certResolver: {{ nextcloud_cert_resolver }}
+      traefik.http.routers.nextcloud.middlewares: private_svc@file
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:{{ mariadb_version }}
+    container_name: mariadb
+    networks:
+      - {{ nextcloud_traefik_network_name }}
+    environment:
+      - PUID=1024
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD=mariadbpassword
+      - TZ=America/Chicago
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=ncuser
+      - MYSQL_PASSWORD=ncpassword
+    volumes:
+      - {{ nextcloud_mariadb_data_dir }}:/config
+    restart: unless-stopped
+
+networks:
+  {{ nextcloud_traefik_network_name }}:
+    external: true

@@ -1,0 +1,25 @@
+---
+- name: Set netplan for private network
+  hosts: private_network_hosts
+  gather_facts: true
+  become: true
+  any_errors_fatal: true
+  roles:
+    - role: mrlesmithjr.netplan
+      netplan_enabled: true
+      netplan_config_file: /etc/netplan/90-private.yaml
+      netplan_renderer: networkd
+      netplan_configuration:
+        network:
+          version: 2
+          ethernets:
+            ens3:
+              addresses:
+                - "{{ private_ip }}"
+              gateway4: "192.168.10.254"
+              nameservers:
+                addresses:
+                  - 1.1.1.1
+                  - 8.8.8.8
+              match:
+                macaddress: "{{ ansible_facts['ens3']['macaddress'] }}"
