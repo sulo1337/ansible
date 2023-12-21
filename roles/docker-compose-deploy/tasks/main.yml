@@ -105,10 +105,13 @@
   copy:
     dest: "{{ docker_compose_config_dir }}/.env"
     content: |
+      {% if docker_envars is defined %}
       {% for key, value in docker_envars.items() %}
       {{ key }}={{ value }}
       {% endfor %}
+      {% endif %}
     mode: '0400'
+  when: docker_envars is defined
   tags:
     - all
     - up
