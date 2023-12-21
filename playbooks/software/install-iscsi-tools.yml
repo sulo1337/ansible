@@ -12,6 +12,16 @@
         - "lsscsi"
 
   tasks:
+    - name: Configure multipath
+      ansible.builtin.blockinfile:
+        path: /etc/multipath.conf
+        block: |
+          defaults {
+            user_friendly_names yes
+            find_multipaths yes
+          }
+        create: yes
+        
     - name: Restart iscsi
       ansible.builtin.service:
         name: iscsid
