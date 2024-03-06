@@ -1,9 +1,7 @@
 ---
-# Note that UFW settings need to be manually configured to enable docker network to have access to host
-# example: ufw allow from 172.16.0.0/12 (docker network cidr)
 - name: Setup default user accounts
   gather_facts: true
-  hosts: coolify_managed
+  hosts: coolify_hosts
   become: true
   vars:
     # geerlingguy.docker 
@@ -41,23 +39,3 @@
   roles:
     - robertdebock.users
     - geerlingguy.docker
-
-- name: Setup coolify data directory
-  gather_facts: true
-  hosts: coolify_managed
-  become: true
-  tasks:
-    - name: Create data directory
-      file:
-        path: /data
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-    - name: Create coolify data directory
-      file:
-        path: /data/coolify
-        state: directory
-        owner: coolify
-        group: coolify
-        mode: '0755'

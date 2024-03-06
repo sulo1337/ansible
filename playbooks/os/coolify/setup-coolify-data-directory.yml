@@ -1,0 +1,20 @@
+---
+- name: Setup coolify data directory
+  gather_facts: true
+  hosts: coolify_hosts
+  become: true
+  tasks:
+    - name: Create data directory
+      file:
+        path: /data
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Create coolify data directory
+      file:
+        path: /data/coolify
+        state: directory
+        owner: coolify
+        group: coolify
+        mode: '0755'

@@ -1,0 +1,35 @@
+---
+- name: Setup coolify server
+  gather_facts: true
+  hosts: coolify_server
+  become: true
+  tasks:
+    - name: Allow everywhere from docker network
+      community.general.ufw:
+        rule: allow
+        direction: in
+        from_ip: "172.16.0.0/12"
+    - name: Get cloudflare api token from environment
+      ansible.builtin.set_fact:
+        cloudflare_dns_api_token: "{{ lookup('env', 'CLOUDFLARE_DNS_API_TOKEN') }}"
+      when: lookup('env', 'CLOUDFLARE_DNS_API_TOKEN') != ''
+      no_log: true
+    - name: Verify cloudflare api token is set
+      fail:
+        msg: "CLOUDFLARE_DNS_API_TOKEN is not set"
+      when: cloudflare_dns_api_token is not defined
+    - name: Setup traefik config
+      template:
+        src: "templates/traefik.yaml"
+        dest: "/data/coolify/proxy/docker-compose.yml"
+        owner: coolify
+        group: coolify
+        mode: '0660'
+    - name: Create .env file for traefik
+      copy:
+        content: |
+          CLOUDFLARE_DNS_API_TOKEN={{ cloudflare_dns_api_token }}
+        dest: "/data/coolify/proxy/.env"
+        owner: coolify
+        group: coolify
+        mode: '0660'
