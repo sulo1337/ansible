@@ -14,9 +14,9 @@ services:
     networks:
       - coolify
     ports:
-      - '80:80'
-      - '443:443'
-      - '8080:8080'
+{% for port_mapping in traefik_port_mappings %}
+      - {{ port_mapping }}  
+{% endfor %}
     healthcheck:
       test: 'wget -qO- http://localhost:80/ping || exit 1'
       interval: 4s

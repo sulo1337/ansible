@@ -1,18 +1,13 @@
 ---
-- name: Setup coolify server
+- name: Setup coolify managed server
   gather_facts: true
-  hosts: coolify_server
+  hosts: coolify_managed
   become: true
   vars:
     traefik_port_mappings:
       - "127.0.0.1:80:80"
       - "127.0.0.1:443:443"
   tasks:
-    - name: Allow everywhere from docker network
-      community.general.ufw:
-        rule: allow
-        direction: in
-        from_ip: "172.16.0.0/12"
     - name: Get IP address of tailscale network interface
       ansible.builtin.command: "tailscale ip -4"
       register: tailscale_ip
