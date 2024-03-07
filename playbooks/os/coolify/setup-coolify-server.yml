@@ -53,7 +53,7 @@
         dest: "/data/coolify/proxy/docker-compose.yml"
         owner: coolify
         group: coolify
-        mode: '0660'
+        mode: '0644'
     - name: Create .env file for traefik
       copy:
         content: |
@@ -61,4 +61,4 @@
         dest: "/data/coolify/proxy/.env"
         owner: coolify
         group: coolify
-        mode: '0660'
+        mode: '0640'

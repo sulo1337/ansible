@@ -10,18 +10,18 @@
         state: directory
         owner: root
         group: root
-        mode: '0755'
+        mode: '0644'
     - name: Create coolify data directory
       file:
         path: /data/coolify
         state: directory
         owner: coolify
         group: coolify
-        mode: '0755'
+        mode: '0644'
     - name: Create coolify proxy directory
       file:
         path: /data/coolify/proxy
         state: directory
         owner: coolify
         group: coolify
-        mode: '0755'
+        mode: '0644'
