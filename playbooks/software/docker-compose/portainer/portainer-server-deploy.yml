@@ -1,0 +1,20 @@
+---
+- name: Portainer deploy docker-compose
+  hosts: portainer_server
+  gather_facts: true
+  become: true
+  vars:
+    # portainer specific vars
+    portainer_version: 2.20.3
+    portainer_network: traefik_tickernet
+    portainer_data_volume_name: portainer_data
+    portainer_frontend_fqdn: portainer.tickerbull.io
+    portainer_edge_fqdn: portainer-edge.tickerbull.io
+    portainer_cert_resolver: dns
+    # docker-compose-deploy specific vars
+    docker_compose_template: "templates/docker-compose.yml.j2"
+    docker_compose_config_dir: /opt/ansible/docker-compose-apps/portainer
+    force_recreate_containers: false
+    remove_volumes: false
+  roles:
+    - role: docker-compose-deploy

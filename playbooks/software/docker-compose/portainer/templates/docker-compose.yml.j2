@@ -1,0 +1,34 @@
+version: '3.8'
+volumes:
+  {{ portainer_data_volume_name}}:
+networks:
+  {{ portainer_network }}:
+    external: true
+services:
+  portainer:
+    container_name: portainer
+    image: 'portainer/portainer-ce:{{ portainer_version }}'
+    restart: always
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - {{ portainer_data_volume_name }}:/data
+    networks:
+      - {{ portainer_network }}
+    labels:
+      - "traefik.enable=true"
+      # Frontend
+      - "traefik.http.routers.portainer.rule=Host(`{{ portainer_frontend_fqdn }}`)"
+      - "traefik.http.routers.portainer.entrypoints=https"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.tls.certResolver={{ portainer_cert_resolver }}"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.routers.portainer.middlewares=private_svc"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      # Edge
+      - "traefik.http.routers.portaineredge.rule=Host(`{{ portainer_edge_fqdn }}`)"
+      - "traefik.http.routers.portaineredge.entrypoints=https"
+      - "traefik.http.routers.portaineredge.tls=true"
+      - "traefik.http.routers.portaineredge.tls.certResolver={{ portainer_cert_resolver }}"
+      - "traefik.http.routers.portaineredge.service=portaineredge"
+      - "traefik.http.routers.portaineredge.middlewares=private_svc"
+      - "traefik.http.services.portaineredge.loadbalancer.server.port=8000"
