@@ -5,29 +5,27 @@
   become: true
   vars:
     # traefik specific vars
-    traefik_acme_http_email: admin@tickerwolf.com
-    traefik_acme_dns_email: admin@tickerwolf.com
+    traefik_acme_http_email: admin@tickerbull.io
+    traefik_acme_dns_email: admin@tickerbull.io
     traefik_image_version: v2.10.7
-    traefik_ssl_cert_volume_name: traefik_ssl_certs
-    traefik_fqdn: traefik-srv01.tickerwolf.com
-    traefik_network_name: tickernet_ansible_managed
-    traefik_log_level: ERROR # one of ERROR, INFO, DEBUG
-    traefik_acme_dns_resolver: 1.1.1.1:53
+    traefik_data_volume_name: traefik_data
+    traefik_fqdn: traefik.{{ ansible_hostname }}.tickerbull.io
+    traefik_network_name: tickernet
+    traefik_log_level: error # one of error, info, debug
+    traefik_acme_dns_resolver: 1.1.1.1
     cert_resolver: dns # one of http-staging,dns-staging,http,dns
     # docker-compose-deploy specific vars
-    docker_compose_template: "templates/docker-compose.yaml.j2"
+    docker_compose_template: "templates/docker-compose.yml.j2"
     docker_compose_config_dir: /opt/ansible/docker-compose-apps/traefik
     force_recreate_containers: false
     remove_volumes: false
-    additional_templates: 
-      - "templates/traefik.yaml"
     required_envars:
       - "CLOUDFLARE_DNS_API_TOKEN"
     traefik_port_mappings:
       - "127.0.0.1:80:80"
       - "127.0.0.1:443:443"
-      - "10.0.0.1:80:80"
-      - "10.0.0.1:443:443"
+      - "{{ ansible_tailscale0.ipv4.address }}:80:80"
+      - "{{ ansible_tailscale0.ipv4.address }}:443:443"
       # expose traefik to public internet
       # - "0.0.0.0:443:443"
   roles:
