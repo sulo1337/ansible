@@ -1,0 +1,20 @@
+- name: uninstall alloy
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: stop alloy
+      systemd:
+        name: alloy
+        state: stopped
+        enabled: no
+
+    - name: uninstall alloy
+      apt:
+        name: alloy
+        state: absent
+
+    - name: remove alloy config
+      file:
+        path: /etc/alloy/alloy.config
+        state: absent

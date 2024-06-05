@@ -1,0 +1,299 @@
+logging {
+        level = "{{ alloy_log_level | default('error') }}"
+}
+
+/** START - remote endpoint configuration */
+
+// prometheus push endpoint reference
+prometheus.remote_write "prom01" {
+        endpoint {
+                url = "{{ alloy_prometheus_push_url }}"
+                basic_auth {
+                        username = "{{ alloy_prometheus_push_username }}"
+                        password = "{{ alloy_prometheus_push_password }}"
+                }
+        }
+}
+
+// loki write endpoint reference
+loki.write "loki01" {
+        endpoint {
+                url = "{{ alloy_loki_push_url }}"
+                basic_auth {
+                        username = "{{ alloy_loki_push_username }}"
+                        password = "{{ alloy_loki_push_password }}"
+                }
+        }
+}
+
+/** END - remote endpoint configuration */
+
+{% if alloy_enable_node_exporter is not defined or alloy_enable_node_exporter == true %}
+/** START - node exporter configuration */
+
+// prometheus node exporter configuration
+prometheus.exporter.unix "node_exporter" {
+    include_exporter_metrics = true
+    enable_collectors                = ["systemd"]
+    disable_collectors       = ["mdadm", "ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+
+    filesystem {
+        fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+        mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+        mount_timeout        = "5s"
+    }
+
+    netclass {
+        ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+    }
+
+    netdev {
+        device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+    }
+}
+
+// relabel metrics collected by node_exporter
+discovery.relabel "node_exporter" {
+    targets = prometheus.exporter.unix.node_exporter.targets
+
+    rule {
+      target_label = "instance"
+      replacement = constants.hostname
+    }
+
+    rule {
+        target_label = "job"
+        replacement  = "node_exporter"
+    }
+
+    rule {
+        target_label = "cluster"
+        replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+    }
+}
+
+// prometheus scrape config for node_exporter job
+prometheus.scrape "node_exporter" {
+    targets    = discovery.relabel.node_exporter.output
+    forward_to = [prometheus.remote_write.prom01.receiver]
+    job_name   = "node_exporter"
+}
+
+/** END - node exporter configuration */
+{% endif %}
+
+{% if alloy_enable_process_exporter is not defined or alloy_enable_process_exporter == true %}
+
+/** START - process exporter configuration */
+
+// prometheus process exporter configuration
+prometheus.exporter.process "process_exporter" {
+        matcher {
+                name    = "{{ '{{.Comm}}' }}"
+                cmdline = [".+"]
+        }
+}
+
+// relabel metrics collected by process_exporter
+discovery.relabel "process_exporter" {
+        targets = prometheus.exporter.process.process_exporter.targets
+
+        rule {
+                target_label = "instance"
+                replacement  = constants.hostname
+        }
+
+        rule {
+                target_label = "job"
+                replacement  = "process_exporter"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+        }
+}
+
+// prometheus scrape config for process_exporter job
+prometheus.scrape "process_exporter" {
+        targets    = discovery.relabel.process_exporter.output
+        forward_to = [prometheus.remote_write.prom01.receiver]
+        job_name   = "process_exporter"
+}
+
+/** END - process exporter configuration */
+
+{% endif %}
+
+{% if alloy_enable_docker_metrics_exporter is not defined or alloy_enable_docker_metrics_exporter == true %}
+
+/** START - cadvisor exporter configuration */
+
+// prometheus cadvisor exporter configuration
+prometheus.exporter.cadvisor "docker_exporter" {
+        docker_host             = "unix:///var/run/docker.sock"
+        docker_only = true
+}
+
+// relabel metrics collected by docker_exporter
+discovery.relabel "docker_exporter_metrics_relabel" {
+        targets = prometheus.exporter.cadvisor.docker_exporter.targets
+
+        rule {
+                target_label = "instance"
+                replacement  = constants.hostname
+        }
+
+        rule {
+                target_label = "job"
+                replacement  = "docker_exporter"
+        }
+
+        rule {
+                source_labels = ["name"]
+                target_label = "container"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+        }
+}
+
+// prometheus scrape config for docker_exporter job
+prometheus.scrape "docker_exporter" {
+        targets    = discovery.relabel.docker_exporter_metrics_relabel.output
+        forward_to = [prometheus.remote_write.prom01.receiver]
+        job_name   = "docker_exporter"
+}
+
+/** END - cadvisor exporter configuration */
+
+{% endif %}
+
+{% if alloy_enable_docker_logs_exporter is not defined or alloy_enable_docker_logs_exporter == true %}
+
+/** START - docker logs loki configuration */
+
+// discover docker targets
+discovery.docker "docker_exporter" {
+        host             = "unix:///var/run/docker.sock"
+        refresh_interval = "5s"
+}
+
+// relabel rules for docker logs
+discovery.relabel "docker_exporter_logs_relabel" {
+        targets = []
+
+        rule {
+                target_label = "job"
+                replacement  = "docker_exporter"
+        }
+
+        rule {
+                target_label = "instance"
+                replacement  = constants.hostname
+        }
+
+        rule {
+                source_labels = ["__meta_docker_container_name"]
+                regex         = "/(.*)"
+                target_label  = "container"
+        }
+
+        rule {
+                source_labels = ["__meta_docker_container_log_stream"]
+                target_label  = "stream"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+        }
+}
+
+// scrape docker logs and forward to remote loki
+loki.source.docker "docker_exporter" {
+        host             = "unix:///var/run/docker.sock"
+        targets          = discovery.docker.docker_exporter.targets
+        forward_to       = [loki.write.loki01.receiver]
+        relabel_rules    = discovery.relabel.docker_exporter_logs_relabel.rules
+        refresh_interval = "5s"
+}
+
+/** END - docker logs loki configuration */
+
+{% endif %}
+
+{% if alloy_enable_journal_scrape is not defined or alloy_enable_journal_scrape == true %}
+
+/** START - system logs loki configuration */
+
+// JOURNAL SCRAPING
+
+// relabel rules for journal scraping
+discovery.relabel "node_journal_scrape" {
+        targets = []
+
+        rule {
+                source_labels = ["__journal__systemd_unit"]
+                target_label  = "unit"
+        }
+
+        rule {
+                source_labels = ["__journal__boot_id"]
+                target_label  = "boot_id"
+        }
+
+        rule {
+                source_labels = ["__journal__transport"]
+                target_label  = "transport"
+        }
+
+        rule {
+                source_labels = ["__journal_priority_keyword"]
+                target_label  = "level"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+        }
+}
+
+// journal scrape configuration
+loki.source.journal "node_journal_scrape" {
+        max_age       = "24h0m0s"
+        relabel_rules = discovery.relabel.node_journal_scrape.rules
+        forward_to    = [loki.write.loki01.receiver]
+        labels        = {
+                job = "node_journal_scrape",
+                instance = constants.hostname,
+        }
+}
+
+{% endif %}
+
+{% if alloy_enable_file_scrape is not defined or alloy_enable_file_scrape == true %}
+
+// DIRECT FILE SCRAPING
+
+// files to be scraped directly
+local.file_match "node_direct_file_scrape" {
+        path_targets = [{
+                __address__ = "localhost",
+                __path__    = "{{ alloy_file_scrape_paths | default('/var/log/{syslog,messages,*.log}') }}",
+                job = "node_direct_file_scrape",
+                instance = constants.hostname,
+                cluster = "{{ alloy_cluster_name | default('unspecified') }}",
+        }]
+}
+
+// direct scrape configuration
+loki.source.file "node_direct_file_scrape" {
+        targets    = local.file_match.node_direct_file_scrape.targets
+        forward_to = [loki.write.loki01.receiver]
+}
+
+/** END - system logs loki configuration */
+{% endif %}

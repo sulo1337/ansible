@@ -1,0 +1,10 @@
+- name: stop alloy
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: stop alloy
+      systemd:
+        name: alloy
+        state: stopped
+        enabled: no
