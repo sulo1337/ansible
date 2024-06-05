@@ -14,6 +14,10 @@ services:
       - {{ portainer_data_volume_name }}:/data
     networks:
       - {{ portainer_network }}
+    ports:
+{% for port_mapping in portainer_edge_endpoint_port_mapping %}
+      - {{ port_mapping }}  
+{% endfor %}
     labels:
       - "traefik.enable=true"
       # Frontend
@@ -24,11 +28,3 @@ services:
       - "traefik.http.routers.portainer.service=portainer"
       - "traefik.http.routers.portainer.middlewares=private_svc"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      # Edge
-      - "traefik.http.routers.portaineredge.rule=Host(`{{ portainer_edge_fqdn }}`)"
-      - "traefik.http.routers.portaineredge.entrypoints=https"
-      - "traefik.http.routers.portaineredge.tls=true"
-      - "traefik.http.routers.portaineredge.tls.certResolver={{ portainer_cert_resolver }}"
-      - "traefik.http.routers.portaineredge.service=portaineredge"
-      - "traefik.http.routers.portaineredge.middlewares=private_svc"
-      - "traefik.http.services.portaineredge.loadbalancer.server.port=8000"

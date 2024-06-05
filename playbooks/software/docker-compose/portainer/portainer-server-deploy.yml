@@ -9,7 +9,9 @@
     portainer_network: traefik_tickernet
     portainer_data_volume_name: portainer_data
     portainer_frontend_fqdn: portainer.tickerbull.io
-    portainer_edge_fqdn: portainer-edge.tickerbull.io
+    portainer_edge_endpoint_port_mapping:
+      - "127.0.0.1:8000:8000"
+      - "{{ ansible_tailscale0.ipv4.address }}:8000:8000"
     portainer_cert_resolver: dns
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yml.j2"
