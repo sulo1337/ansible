@@ -11,9 +11,14 @@ services:
     env_file:
       - .env
     ports:
+{% if traefik_expose_public is defined and traefik_expose_public %}
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+{% else %}
 {% for port_mapping in traefik_port_mappings %}
       - {{ port_mapping }}  
 {% endfor %}
+{% endif %}
     healthcheck:
       test: 'wget -qO- http://localhost:80/ping || exit 1'
       interval: 4s

@@ -26,8 +26,7 @@
       - "127.0.0.1:443:443"
       - "{{ ansible_tailscale0.ipv4.address }}:80:80"
       - "{{ ansible_tailscale0.ipv4.address }}:443:443"
-      # expose traefik to public internet
-      # - "0.0.0.0:443:443"
+    # traefik_expose_public: false
   roles:
     - role: docker-compose-deploy
   
