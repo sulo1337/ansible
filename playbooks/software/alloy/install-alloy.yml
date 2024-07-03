@@ -4,8 +4,8 @@
   gather_facts: true
   vars:
     alloy_log_level: error
-    alloy_prometheus_push_url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
-    alloy_loki_push_url: https://logs-prod-006.grafana.net/loki/api/v1/push
+    alloy_prometheus_push_url: https://prometheus.acharya.cloud/api/v1/write
+    alloy_loki_push_url: https://loki.acharya.cloud/loki/api/v1/push
     alloy_enable_node_exporter: true
     alloy_enable_process_exporter: true
     alloy_enable_docker_metrics_exporter: true
@@ -13,7 +13,7 @@
     alloy_enable_journal_scrape: true
     alloy_enable_file_scrape: true
     alloy_file_scrape_paths: /var/log/{syslog,messages,*.log}
-    alloy_cluster_name: vldaldev
+    alloy_cluster_name: unknown
   tasks:
     - name: install gpg
       apt:

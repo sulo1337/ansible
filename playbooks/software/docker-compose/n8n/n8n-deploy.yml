@@ -6,7 +6,7 @@
   vars:
     # n8n specific vars
     n8n_version: 1.1.1
-    n8n_fqdn: n8n.tickerwolf.com
+    n8n_fqdn: n8n.acharya.cloud
     n8n_cert_resolver: dns
     n8n_traefik_network_name: traefik_tickernet_ansible_managed
     # docker-compose-deploy specific vars

@@ -10,7 +10,7 @@ alerting:
 scrape_configs:
   - job_name: "prometheus"
     static_configs:
-      - targets: ["prometheus.tickerwolf.com"]
+      - targets: ["prometheus.acharya.cloud"]
 
   - job_name: "node_metrics"
     file_sd_configs:
@@ -19,4 +19,4 @@ scrape_configs:
   
   - job_name: "cadvisor_vlchicprodsrv00"
     static_configs:
-      - targets: ["cadv-vlchicprodsrv00.tickerwolf.com"]
+      - targets: ["cadv-vlchicprodsrv00.acharya.cloud"]

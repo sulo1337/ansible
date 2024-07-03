@@ -5,11 +5,11 @@
   become: true
   vars:
     # traefik specific vars
-    traefik_acme_http_email: admin@tickerbull.io
-    traefik_acme_dns_email: admin@tickerbull.io
+    traefik_acme_http_email: admin@acharya.cloud
+    traefik_acme_dns_email: admin@acharya.cloud
     traefik_image_version: v2.10.7
     traefik_data_volume_name: traefik_data
-    traefik_fqdn: traefik.{{ ansible_hostname }}.tickerbull.io
+    traefik_fqdn: traefik.{{ ansible_hostname }}.acharya.cloud
     traefik_network_name: tickernet
     traefik_log_level: error # one of error, info, debug
     traefik_acme_dns_resolver: 1.1.1.1

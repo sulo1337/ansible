@@ -8,7 +8,7 @@
     prometheus_scrape_interval: 15s
     prometheus_evaluation_interval: 15s
     prometheus_version: v2.46.0
-    prometheus_fqdn: prometheus.tickerwolf.com
+    prometheus_fqdn: prometheus.acharya.cloud
     prometheus_traefik_network_name: traefik_tickernet_ansible_managed
     prometheus_cert_resolver: dns
     # docker-compose-deploy specific vars

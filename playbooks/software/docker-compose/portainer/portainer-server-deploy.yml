@@ -8,7 +8,7 @@
     portainer_version: 2.20.3
     portainer_network: traefik_tickernet
     portainer_data_volume_name: portainer_data
-    portainer_frontend_fqdn: portainer.tickerbull.io
+    portainer_frontend_fqdn: portainer.acharya.cloud
     portainer_edge_endpoint_port_mapping:
       - "127.0.0.1:8000:8000"
       - "{{ ansible_tailscale0.ipv4.address }}:8000:8000"

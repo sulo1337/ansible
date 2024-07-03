@@ -7,7 +7,7 @@
     # grafana specific vars
     grafana_version: 10.0.3-ubuntu
     grafana_traefik_network_name: traefik_tickernet_ansible_managed
-    grafana_fqdn: grafana.tickerwolf.com
+    grafana_fqdn: grafana.acharya.cloud
     grafana_cert_resolver: dns
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"

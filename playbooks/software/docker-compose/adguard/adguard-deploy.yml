@@ -8,7 +8,7 @@
     adguard_admin_user: admin
     adguard_admin_pw: $2a$12$0r5o5jTSUQd7LExuOX9LO.Iq6l15mx43NCVSR0f9DMHcCdgOfofy2
     adguard_dns_port: 53
-    adguard_fqdn: dns.tickerwolf.com
+    adguard_fqdn: dns.acharya.cloud
     adguard_cert_resolver: dns
     adguard_image_version: v0.108.0-b.38
     adguard_traefik_network_name: traefik_tickernet_ansible_managed

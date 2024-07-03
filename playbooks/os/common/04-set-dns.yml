@@ -8,9 +8,9 @@
       - "1.1.1.1"
       - "8.8.8.8"
       - "8.8.4.4"
-    resolv_domain: "tickerbull.io"
+    resolv_domain: "acharya.cloud"
     resolv_search:
-      - "tickerbull.io"
+      - "acharya.cloud"
   tasks:
     - name: Stop and disable systemd-resolved
       systemd:
