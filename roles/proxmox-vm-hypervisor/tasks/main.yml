@@ -1,20 +1,21 @@
 ---
 # Prerequisite: Should have a cloud-init image ready!
-- name: Install dependencies
-  include_role:
-    name: geerlingguy.pip
-  vars:
-    pip_package: python3-pip
-    pip_install_packages:
-      - name: proxmoxer
-        version: 1.0.3
-  tags:
-    - always
+# - name: Install dependencies
+#   include_role:
+#     name: geerlingguy.pip
+#   vars:
+#     pip_package: python3-pip
+#     pip_install_packages:
+#       - name: proxmoxer
+#         version: 2.1.0
+#   tags:
+#     - always
 
 - name: Clone VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     node: "{{ item.value.node | default(proxmox_vm_defaults.node) }}"
     name: "{{ item.key }}"
@@ -30,7 +31,8 @@
 - name: Update VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     cores: "{{ item.value.cores | default(proxmox_vm_defaults.cores) }}"
     sockets: "{{ item.value.sockets | default(proxmox_vm_defaults.sockets) }}"
@@ -41,25 +43,40 @@
     name: "{{ item.key }}"
     boot: "dc"
     bootdisk: scsi0
-    net:
-      net0: "virtio,bridge=vmbr0"
     ipconfig:
       ipconfig0: "{% if (item.value.ipaddress0 is undefined or item.value.ipaddress0=='dhcp') %}ip=dhcp{% else %}ip={{ item.value.ipaddress0}},gw={{ item.value.gateway0 }}{% endif %}"
+    ciuser: "{{ item.value.ciuser | default(omit) }}"
+    cipassword: "{{ item.value.cipassword | default(omit) }}"
+    sshkeys: "{{ item.value.sshkeys | default(omit) }}"
   with_dict: "{{ vms }}"
   tags:
     - update
 
+- name: Set network devices
+  ansible.builtin.command:
+    cmd: >-
+      qm set {{ item.value.vmid }} 
+      --net0 virtio,bridge={{ item.value.bridge }}{% if item.value.vlanid is defined %},tag={{ item.value.vlanid }}{% endif %}
+  with_dict: "{{ vms }}"
+  register: output
+  changed_when: output.rc != 0
+  tags:
+    - update
+    
 - name: Update Disk Size
   ansible.builtin.command:
     cmd: "qm resize {{ item.value.vmid }} scsi0 {{ item.value.disksize | default(proxmox_vm_defaults.disksize) }}"
   with_dict: "{{ vms }}"
+  register: output
+  changed_when: output.rc != 0
   tags:
     - update
 
 - name: Start VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     vmid: "{{ item.value.vmid }}"
     node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
@@ -71,7 +88,8 @@
 - name: Stop VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     vmid: "{{ item.value.vmid }}"
     node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
@@ -95,7 +113,8 @@
 - name: Delete VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     vmid: "{{ item.value.vmid }}"
     node: "{{ item.key | default(proxmox_vm_defaults.node) }}"

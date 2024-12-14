@@ -1,36 +1,45 @@
 ---
 # Prerequisite: pre-configured cloud-init image named ubuntu-cloud should be ready!
 - name: Create VM from cloud-init image 
-  gather_facts: true 
+  gather_facts: true
   hosts: proxmox_hypervisor
   become: true
   roles:
     - role: proxmox-vm-hypervisor
       vms:
         vldalstagsrv01:
+          node: "pldalprodsm01"
           vmid: "101"
-          clone: "ubuntu-cloud"
+          clone: "ubuntu-2404-cloudinit-template"
           cores: 4
           sockets: 1
           memory: 4096
           disksize: "15G"
-          ipaddress0: "172.16.1.101/24"
-          gateway0: "172.16.1.1"
+          ciuser: "sulochan"
+          cipassword: "changeme"
+          bridge: "vmbr0"
+          vlanid: 20
         vldalstagsrv02:
+          node: "pldalprodsm01"
           vmid: "102"
-          clone: "ubuntu-cloud"
+          clone: "ubuntu-2404-cloudinit-template"
           cores: 4
           sockets: 1
           memory: 4096
           disksize: "15G"
-          ipaddress0: "172.16.1.102/24"
-          gateway0: "172.16.1.1"
+          ciuser: "sulochan"
+          cipassword: "changeme"
+          bridge: "vmbr0"
+          vlanid: 20
         vldalstagsrv03:
+          node: "pldalprodsm01"
           vmid: "103"
-          clone: "ubuntu-cloud"
+          clone: "ubuntu-2404-cloudinit-template"
           cores: 4
           sockets: 1
           memory: 4096
           disksize: "15G"
-          ipaddress0: "172.16.1.103/24"
-          gateway0: "172.16.1.1"
+          ciuser: "sulochan"
+          cipassword: "changeme"
+          bridge: "vmbr0"
+          vlanid: 20
