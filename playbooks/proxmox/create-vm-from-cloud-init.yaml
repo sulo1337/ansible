@@ -1,43 +1,48 @@
 ---
 # Prerequisite: pre-configured cloud-init image named ubuntu-cloud should be ready!
 - name: Create VM from cloud-init image 
-  gather_facts: true
-  hosts: proxmox_hypervisor
-  become: true
+  gather_facts: false
+  hosts: localhost
+  vars:
+    proxmox: 
+      api_user: "" # provide a user with permissions to create VMs eg: root@pam
+      api_token_id: "" # provide a token name with permissions to create VMs eg: token1
+      api_token_secret: "" # provide the api key for the user
+      api_host: "" # provide the hostname of the proxmox server eg: proxmox.mydomain.com
   roles:
     - role: proxmox-vm-hypervisor
       vms:
         vldalstagsrv01:
-          node: "pldalprodsm01"
+          node: "node01" # provide the node where this vm needs to be deployed
           vmid: "101"
           clone: "ubuntu-2404-cloudinit-template"
-          cores: 4
+          cores: 8
           sockets: 1
-          memory: 4096
+          memory: 8192
           disksize: "15G"
           ciuser: "sulochan"
           cipassword: "changeme"
           bridge: "vmbr0"
           vlanid: 20
         vldalstagsrv02:
-          node: "pldalprodsm01"
+          node: "node02"
           vmid: "102"
           clone: "ubuntu-2404-cloudinit-template"
-          cores: 4
+          cores: 8
           sockets: 1
-          memory: 4096
+          memory: 8192
           disksize: "15G"
           ciuser: "sulochan"
           cipassword: "changeme"
           bridge: "vmbr0"
           vlanid: 20
         vldalstagsrv03:
-          node: "pldalprodsm01"
+          node: "node03"
           vmid: "103"
           clone: "ubuntu-2404-cloudinit-template"
-          cores: 4
+          cores: 8
           sockets: 1
-          memory: 4096
+          memory: 8192
           disksize: "15G"
           ciuser: "sulochan"
           cipassword: "changeme"

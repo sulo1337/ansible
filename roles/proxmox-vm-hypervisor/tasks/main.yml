@@ -1,16 +1,4 @@
 ---
-# Prerequisite: Should have a cloud-init image ready!
-# - name: Install dependencies
-#   include_role:
-#     name: geerlingguy.pip
-#   vars:
-#     pip_package: python3-pip
-#     pip_install_packages:
-#       - name: proxmoxer
-#         version: 2.1.0
-#   tags:
-#     - always
-
 - name: Clone VMs
   community.general.proxmox_kvm:
     api_user: "{{ proxmox.api_user }}"
@@ -52,38 +40,34 @@
   tags:
     - update
 
-- name: Set network devices
-  ansible.builtin.command:
-    cmd: >-
-      qm set {{ item.value.vmid }} 
-      --net0 virtio,bridge={{ item.value.bridge }}{% if item.value.vlanid is defined %},tag={{ item.value.vlanid }}{% endif %}
-  with_dict: "{{ vms }}"
-  register: output
-  changed_when: output.rc != 0
-  tags:
-    - update
-    
-- name: Update Disk Size
-  ansible.builtin.command:
-    cmd: "qm resize {{ item.value.vmid }} scsi0 {{ item.value.disksize | default(proxmox_vm_defaults.disksize) }}"
-  with_dict: "{{ vms }}"
-  register: output
-  changed_when: output.rc != 0
-  tags:
-    - update
-
-- name: Start VMs
-  community.general.proxmox_kvm:
+- name: Configure VM Network
+  community.general.proxmox_nic:
     api_user: "{{ proxmox.api_user }}"
     api_token_id: "{{ proxmox.api_token_id }}"
     api_token_secret: "{{ proxmox.api_token_secret }}"
     api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
     vmid: "{{ item.value.vmid }}"
-    node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
-    state: started
+    interface: net0
+    bridge: "{{ item.value.bridge }}"
+    tag: "{{ item.value.vlanid | default(omit) }}"
   with_dict: "{{ vms }}"
   tags:
-    - start
+    - update
+    
+- name: Resize VM Disk
+  community.general.proxmox_disk:
+    api_user: "{{ proxmox.api_user }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    vmid: "{{ item.value.vmid }}"
+    disk: "scsi0"
+    state: "resized"
+    size: "{{ item.value.disksize | default(proxmox_vm_defaults.disksize) }}"
+  with_dict: "{{ vms }}"
+  tags:
+    - update
+    
 
 - name: Stop VMs
   community.general.proxmox_kvm:
@@ -101,7 +85,22 @@
     - never
     - stop
     - delete
+    - restart
 
+- name: Start VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_token_id: "{{ proxmox.api_token_id }}"
+    api_token_secret: "{{ proxmox.api_token_secret }}"
+    api_host: "{{ proxmox.api_host | default(inventory_hostname) }}"
+    vmid: "{{ item.value.vmid }}"
+    node: "{{ item.key | default(proxmox_vm_defaults.node) }}"
+    state: started
+  with_dict: "{{ vms }}"
+  tags:
+    - start
+    - restart
+    
 - name: Confirm Delete VMs
   pause:
     prompt: "Are you sure you want to delete VM with ID: {{ item.value.vmid }}?. Press 'return' to continue. Press Ctrl+C and then 'a' to abort."
