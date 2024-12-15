@@ -7,7 +7,7 @@
     # traefik specific vars
     traefik_acme_http_email: admin@acharya.cloud
     traefik_acme_dns_email: admin@acharya.cloud
-    traefik_image_version: v2.10.7
+    traefik_image_version: v3.2.2
     traefik_data_volume_name: traefik_data
     traefik_fqdn: traefik.{{ ansible_hostname }}.acharya.cloud
     traefik_network_name: traefiknet
