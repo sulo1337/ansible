@@ -16,5 +16,5 @@
     - name: Ensure /etc/hosts has the correct entry for self
       lineinfile:
         path: /etc/hosts
-        line: "{{ ansible_host }} {{ short_hostname }}"
+        line: "{{ ansible_default_ipv4.address }} {{ short_hostname }}"
         state: present

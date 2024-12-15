@@ -12,15 +12,17 @@
   become: true
   remote_user: root
   vars:
-    users_group_list:
+    users_groups:
       - name: sysadmin
-        system: yes
-    users_user_list:
+        system: true
+    users:
       - name: ansible
         comments: Ansible Automation User
         uid: 1001
-        groups: sysadmin,sudo
-        cron_allow: yes
+        groups:
+          - sysadmin
+          - sudo
+        cron_allow: true
         sudo_options: "ALL=(ALL) NOPASSWD: ALL"
         authorized_keys:
           - "https://gist.githubusercontent.com/sulo1337/f315295738461118275db6fa4d9176c5/raw/0e92a535b90b6bf932a5c98cb43466e759d0ef1b/id_ed25519_ansible.pub"

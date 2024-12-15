@@ -2,13 +2,13 @@
 - name: Install Docker
   hosts: docker_hosts
   gather_facts: true
-  become: yes
+  become: true
   vars:
     docker_service_manage: true
     docker_service_state: started
     docker_service_enabled: true
     docker_install_compose: true
-    docker_compose_version: "v2.19.0"
+    docker_compose_version: "v2.32.0"
     docker_compose_arch: "{{ ansible_architecture }}"
     docker_compose_path: /usr/bin/docker-compose
     docker_users:

@@ -1,6 +1,6 @@
 ---
 - name: Tailscale install and join
-  hosts: vpn_clients
+  hosts: all
   gather_facts: true
   become: true
   roles:

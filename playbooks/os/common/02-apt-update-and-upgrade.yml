@@ -6,7 +6,7 @@
   tasks:
     - name: Apt update
       apt:
-        update_cache: yes
+        update_cache: true
     - name: Apt upgrade
       apt:
-        upgrade: yes
+        upgrade: true
