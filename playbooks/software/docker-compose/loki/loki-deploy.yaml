@@ -6,7 +6,7 @@
   vars:
     # loki specific vars
     loki_version: 2.8.3
-    loki_traefik_network_name: traefik_tickernet_ansible_managed
+    loki_traefik_network_name: traefiknet
     loki_fqdn: loki.acharya.cloud
     loki_cert_resolver: dns
     # docker-compose-deploy specific vars

@@ -9,7 +9,7 @@
     prometheus_evaluation_interval: 15s
     prometheus_version: v2.46.0
     prometheus_fqdn: prometheus.acharya.cloud
-    prometheus_traefik_network_name: traefik_tickernet_ansible_managed
+    prometheus_traefik_network_name: traefiknet
     prometheus_cert_resolver: dns
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"

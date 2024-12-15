@@ -8,7 +8,7 @@
     n8n_version: 1.1.1
     n8n_fqdn: n8n.acharya.cloud
     n8n_cert_resolver: dns
-    n8n_traefik_network_name: traefik_tickernet_ansible_managed
+    n8n_traefik_network_name: traefiknet
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"
     docker_compose_config_dir: /opt/ansible/docker-compose-apps/n8n

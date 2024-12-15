@@ -6,7 +6,7 @@
   vars:
     # cadvisor specific vars
     cadvisor_version: latest
-    cadvisor_traefik_network_name: traefik_tickernet_ansible_managed
+    cadvisor_traefik_network_name: traefiknet
     cadvisor_cert_resolver: dns
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"

@@ -6,7 +6,7 @@
   vars:
     # portainer specific vars
     portainer_version: 2.20.3
-    portainer_network: traefik_tickernet
+    portainer_network: traefiknet
     portainer_data_volume_name: portainer_data
     portainer_frontend_fqdn: portainer.acharya.cloud
     portainer_edge_endpoint_port_mapping:

@@ -6,7 +6,7 @@
   vars:
     # promtail specific vars
     promtail_version: 2.8.3
-    promtail_traefik_network_name: traefik_tickernet_ansible_managed
+    promtail_traefik_network_name: traefiknet
     promtail_loki_api_url: https://loki.acharya.cloud/loki/api/v1/push
     # docker-compose-deploy specific vars
     docker_compose_template: "templates/docker-compose.yaml.j2"
