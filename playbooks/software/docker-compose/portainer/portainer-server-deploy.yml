@@ -5,7 +5,7 @@
   become: true
   vars:
     # portainer specific vars
-    portainer_version: 2.20.3
+    portainer_version: 2.25.0
     portainer_network: traefiknet
     portainer_data_volume_name: portainer_data
     portainer_frontend_fqdn: portainer.acharya.cloud
