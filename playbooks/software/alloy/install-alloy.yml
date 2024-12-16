@@ -35,17 +35,24 @@
       lineinfile:
         path: /etc/apt/sources.list.d/grafana.list
         line: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
-        create: yes
+        create: true
 
     - name: update apt and install alloy
       apt:
-        update_cache: yes
+        update_cache: true
         name: alloy
         state: present
+
+    # custom systemd file to change default alloy user to root
+    - name: copy allow service file to /etc/systemd/system
+      copy:
+        src: /lib/systemd/system/alloy.service
+        dest: /etc/systemd/system/alloy.service
+        remote_src: true
     
     - name: change alloy.service systemd user to root
       lineinfile:
-        path: /lib/systemd/system/alloy.service
+        path: /etc/systemd/system/alloy.service
         regexp: '^User='
         line: 'User=root'
         state: present
@@ -53,12 +60,12 @@
 
     - name: reload systemd
       systemd:
-        daemon_reload: yes
+        daemon_reload: true
 
     - name: check if docker is installed
       command: docker --version
       register: docker_validation
-      ignore_errors: yes
+      ignore_errors: true
       changed_when: false
 
     - name: set alloy to use docker metrics and logs exporter
@@ -79,4 +86,4 @@
       systemd:
         name: alloy
         state: restarted
-        enabled: yes
+        enabled: true
