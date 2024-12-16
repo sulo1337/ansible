@@ -8,7 +8,7 @@
     traefik_acme_http_email: admin@acharya.cloud
     traefik_acme_dns_email: admin@acharya.cloud
     traefik_image_version: v3.2.2
-    traefik_data_volume_name: traefik_data
+    traefik_data_volume_path: /etc/traefik
     traefik_fqdn: traefik.{{ ansible_hostname }}.acharya.cloud
     traefik_network_name: traefiknet
     traefik_log_level: error # one of error, info, debug
@@ -27,6 +27,17 @@
       - "{{ ansible_tailscale0.ipv4.address }}:80:80"
       - "{{ ansible_tailscale0.ipv4.address }}:443:443"
     # traefik_expose_public: false
+
+  pre_tasks:
+    - name: ensure traefik data volume path exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ traefik_data_volume_path }}"
+        - "{{ traefik_data_volume_path }}/dynamic"
+        
   roles:
     - role: docker-compose-deploy
   
