@@ -11,6 +11,7 @@
     resolv_domain: "acharya.cloud"
     resolv_search:
       - "acharya.cloud"
+      - "tailbc076.ts.net"
   tasks:
     - name: Stop and disable systemd-resolved
       systemd:

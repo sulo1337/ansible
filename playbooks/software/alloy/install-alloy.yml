@@ -44,7 +44,7 @@
         state: present
 
     # custom systemd file to change default alloy user to root
-    - name: copy allow service file to /etc/systemd/system
+    - name: copy alloy service file to /etc/systemd/system
       copy:
         src: /lib/systemd/system/alloy.service
         dest: /etc/systemd/system/alloy.service

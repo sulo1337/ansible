@@ -1,0 +1,6 @@
+---
+- name: Export NFS
+  hosts: nfs_server
+  become: true
+  roles:
+    - { role: geerlingguy.nfs }
