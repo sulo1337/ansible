@@ -3,24 +3,26 @@
   hosts: all
   become: true
   vars:
-    resolv_nameservers:
-      - "100.100.100.100"
-      - "1.1.1.1"
-      - "8.8.8.8"
-      - "8.8.4.4"
+    # resolv_nameservers: # override in host vars
+    #   - "100.100.100.100"
+    #   - "1.1.1.1"
+    #   - "8.8.8.8"
+    #   - "8.8.4.4"
     resolv_domain: "acharya.cloud"
     resolv_search:
       - "acharya.cloud"
-      - "tailbc076.ts.net"
+      # - "tailbc076.ts.net"
   tasks:
     - name: Stop and disable systemd-resolved
       systemd:
         name: systemd-resolved
         state: stopped
         enabled: no
+      failed_when: false
     - name: Ensure systemd-resolved is masked
       systemd:
         name: systemd-resolved
         masked: yes
+      failed_when: false
   roles:
     - role: ahuffman.resolv
