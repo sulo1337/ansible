@@ -1,6 +1,4 @@
 version: '3.8'
-volumes:
-  {{ portainer_data_volume_name}}:
 networks:
   {{ portainer_network }}:
     external: true
@@ -11,7 +9,7 @@ services:
     restart: always
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - {{ portainer_data_volume_name }}:/data
+      - ${PORTAINER_DATA_PATH:?Portainer data path not set}:/data
     networks:
       - {{ portainer_network }}
     ports:

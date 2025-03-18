@@ -18,5 +18,7 @@
     docker_compose_config_dir: /opt/ansible/docker-compose-apps/portainer
     force_recreate_containers: false
     remove_volumes: false
+    required_envars:
+      - "PORTAINER_DATA_PATH"
   roles:
     - role: docker-compose-deploy
