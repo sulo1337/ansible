@@ -10,7 +10,7 @@
       - name: sulochan
         comments: Sulochan Acharya
         uid: 1024
-        groups: 
+        groups:
           - users
           - sudo
         cron_allow: true
@@ -18,6 +18,5 @@
           - "https://gist.githubusercontent.com/sulo1337/f69a6f0e4bd65bc9399edd2a8721acfe/raw/ce5529253c035f3e38b63ad3674c3ae22cf0bf87/sulochan_pubkey.pub"
         password: "$2a$12$07AY5Cc1.C21Nk4d3cVRDevpYE2diNJn/qXLPIq6n1U00fxHZyfhy"
         expires: -1
-        password_validity_days: 99999
   roles:
     - robertdebock.users

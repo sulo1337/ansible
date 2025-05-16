@@ -13,6 +13,7 @@
     docker_compose_path: /usr/bin/docker-compose
     docker_users:
       - ansible
+      - sulochan
     docker_packages:
       - "docker-{{ docker_edition }}"
       - "docker-{{ docker_edition }}-cli"
