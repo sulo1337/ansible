@@ -298,7 +298,7 @@ loki.source.file "node_direct_file_scrape" {
 /** END - system logs loki configuration */
 {% endif %}
 
-{% if alloy_enable_smartctl_scrape is not defined or alloy_enable_smartctl_scrape == true %}
+{% if alloy_enable_smartctl_scrape is defined and alloy_enable_smartctl_scrape == true %}
 /** START - smartctl scrape configuration - this requires smartctl exporter to be installed on the host to work */
 
 prometheus.scrape "smartctl_exporter" {
@@ -330,5 +330,45 @@ prometheus.relabel "smartctl_relabel" {
 }
 
 /** END - smartctl scrape configuration */
+
+{% endif %}
+
+{% if alloy_enable_ipmi_exporter is defined and alloy_enable_ipmi_exporter == true and alloy_ipmi_scrape_target is defined %}
+/** START - ipmi_exporter scrape configuration - this requires ipmi_exporter to be installed on the scraping host to work */
+
+prometheus.scrape "ipmi_exporter" {
+        targets = [{
+                "__address__" = "localhost:9290",
+        }]
+        metrics_path = "/ipmi"
+        forward_to = [prometheus.relabel.ipmi_relabel.receiver]
+        job_name   = "ipmi_exporter"
+        params = {
+                module = ["default"],
+                target = ["{{ alloy_ipmi_scrape_target }}"],
+        }
+}
+
+// relabel metrics collected by ipmi_exporter
+prometheus.relabel "ipmi_relabel" {
+        forward_to = [prometheus.remote_write.prom01.receiver]
+
+        rule {
+                target_label = "instance"
+                replacement = "{{ alloy_ipmi_scrape_target }}"
+        }
+
+        rule {
+                target_label = "job"
+                replacement  = "ipmi_exporter"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "{{ alloy_cluster_name | default('unspecified') }}"
+        }
+}
+
+/*** END - ipmi_exporter scrape configuration */
 
 {% endif %}
