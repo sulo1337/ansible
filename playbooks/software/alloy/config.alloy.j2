@@ -303,8 +303,9 @@ loki.source.file "node_direct_file_scrape" {
 
 prometheus.scrape "smartctl_exporter" {
         targets = [{
-                "__address__" = "localhost:9633/metrics",
+                "__address__" = "localhost:9633",
         }]
+        metrics_path = "/metrics"
         forward_to = [prometheus.relabel.smartctl_relabel.receiver]
         job_name   = "smartctl_exporter"
 }
