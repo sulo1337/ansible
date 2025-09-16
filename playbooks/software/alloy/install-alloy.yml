@@ -25,17 +25,29 @@
         path: /etc/apt/keyrings/
         state: directory
 
-    - name: add grafana gpg key
-      apt_key:
-        url: https://apt.grafana.com/gpg.key
-        state: present
-        keyring: /etc/apt/keyrings/grafana.gpg
+    # Uncomment for older apt versions that do not support deb822_repository
+    # - name: add grafana gpg key
+    #   apt_key:
+    #     url: https://apt.grafana.com/gpg.key
+    #     state: present
+    #     keyring: /etc/apt/keyrings/grafana.gpg
 
-    - name: add grafana to sources list
-      lineinfile:
-        path: /etc/apt/sources.list.d/grafana.list
-        line: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
-        create: true
+    - name: Add Grafana repository with GPG key
+      deb822_repository:
+        name: grafana
+        types: [deb]
+        uris: https://apt.grafana.com
+        suites: [stable]
+        components: [main]
+        signed_by: https://apt.grafana.com/gpg.key
+        state: present
+
+    # Uncomment for older apt versions that do not support deb822_repository
+    # - name: add grafana to sources list
+    #   lineinfile:
+    #     path: /etc/apt/sources.list.d/grafana.list
+    #     line: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
+    #     create: true
 
     - name: update apt and install alloy
       apt:
