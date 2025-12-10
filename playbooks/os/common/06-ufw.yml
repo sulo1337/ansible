@@ -1,0 +1,128 @@
+---
+- name: UFW Configuration
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    # UFW Rules Configuration
+    # Supported variables:
+    #
+    # ufw_docker_enabled: false # Set this to true to enable Docker UFW rules
+    # ufw_logging_level: medium # Set this to desired logging level: off, low, medium, high, full
+    # ufw_rules: # Define 'ufw_rules' in your inventory or group_vars.
+    #   - rule: allow              
+    #     port: 22                 
+    #     proto: tcp               
+    #     from_ip: 192.168.1.0/24  
+    #     to_ip: any               
+    #     direction: in            
+    #     interface: eth0          
+    #     route: no       # external -> service at host ip set to 'no', external -> service at docker container set to 'yes', docker -> docker set to 'no'      
+    #     comment: "SSH Access"
+
+  tasks:
+    - name: Ensure /etc/ufw directory exists
+      ansible.builtin.file:
+        path: /etc/ufw
+        state: directory
+        mode: '0755'
+
+    - name: Check if UFW configuration has changed
+      ansible.builtin.copy:
+        content: "{{ {'rules': ufw_rules | default([]), 'docker_enabled': ufw_docker_enabled} | to_nice_json }}"
+        dest: /etc/ufw/ansible_ufw_config.json
+        mode: '0600'
+      register: ufw_config_state
+
+    - name: Get current state of /etc/ufw/user.rules
+      ansible.builtin.stat:
+        path: /etc/ufw/user.rules
+        checksum_algorithm: sha1
+      register: ufw_user_rules_file
+
+    - name: Read last known checksum of /etc/ufw/user.rules
+      ansible.builtin.slurp:
+        src: /etc/ufw/ansible_ufw_user_rules.sha1
+      register: ufw_last_checksum
+      ignore_errors: true
+
+    - name: Determine if UFW reset is needed
+      ansible.builtin.set_fact:
+        ufw_needs_reset: >-
+          {{
+            ufw_config_state.changed or
+            ufw_last_checksum.failed or
+            (ufw_user_rules_file.stat.checksum != (ufw_last_checksum.content | b64decode | trim))
+          }}
+
+    - name: Reset UFW to installation defaults
+      community.general.ufw:
+        state: reset
+      when: ufw_needs_reset | bool
+      notify: Reload UFW
+
+    - name: Disable IPv6 in UFW
+      ansible.builtin.lineinfile:
+        path: /etc/default/ufw
+        regexp: '^IPV6='
+        line: 'IPV6=no'
+      notify: Reload UFW
+
+    - name: Add UFW and Docker rules to /etc/ufw/after.rules
+      ansible.builtin.blockinfile:
+        path: /etc/ufw/after.rules
+        marker: "# {mark} UFW AND DOCKER"
+        block: |
+          *filter
+          :ufw-user-forward - [0:0]
+          :ufw-docker-logging-deny - [0:0]
+          :DOCKER-USER - [0:0]
+          -A DOCKER-USER -j ufw-user-forward
+
+          -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+          -A DOCKER-USER -m conntrack --ctstate INVALID -j DROP
+          -A DOCKER-USER -i docker0 -o docker0 -j ACCEPT
+
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 10.0.0.0/8
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 172.16.0.0/12
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 192.168.0.0/16
+
+          -A DOCKER-USER -j RETURN
+
+          -A ufw-docker-logging-deny -m limit --limit 3/min --limit-burst 10 -j LOG --log-prefix "[UFW DOCKER BLOCK] "
+          -A ufw-docker-logging-deny -j DROP
+
+          COMMIT
+      when: ufw_docker_enabled | mandatory | bool
+      notify: Reload UFW
+
+    - name: Ensure UFW is enabled, deny incoming by default, and set logging
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+        logging: "{{ ufw_logging_level | default('medium') }}"
+
+
+    - name: Apply custom firewall rules
+      community.general.ufw:
+        rule: "{{ item.rule | default('allow') }}"
+        port: "{{ item.port | default(omit) }}"
+        proto: "{{ item.proto | default(omit) }}"
+        from_ip: "{{ item.from_ip | default('any') }}"
+        to_ip: "{{ item.to_ip | default('any') }}"
+        direction: "{{ item.direction | default((item.route | default(false) and item.interface is undefined) | ternary(omit, 'in')) }}"
+        interface: "{{ item.interface | default(omit) }}"
+        route: "{{ item.route | default('no') }}"
+        comment: "{{ item.comment | default(omit) }}"
+      loop: "{{ ufw_rules | default([]) }}"
+
+    - name: Update last known checksum of /etc/ufw/user.rules
+      ansible.builtin.shell: sha1sum /etc/ufw/user.rules | awk '{print $1}' > /etc/ufw/ansible_ufw_user_rules.sha1
+      changed_when: false
+
+  handlers:
+    - name: Reload UFW
+      community.general.ufw:
+        state: reloaded
+
