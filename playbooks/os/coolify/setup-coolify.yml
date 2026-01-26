@@ -1,9 +1,0 @@
----
-- name: Setup coolify account
-  import_playbook: setup-coolify-account.yml
-- name: Setup coolify data directory
-  import_playbook: setup-coolify-data-directory.yml
-- name: Setup coolify server
-  import_playbook: setup-coolify-server.yml
-- name: Setup coolify managed server
-  import_playbook: setup-coolify-managed-server.yml
