@@ -1,3 +1,0 @@
---- 
-- name: Sync netclient
-  command: /usr/sbin/netclient pull
