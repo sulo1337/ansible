@@ -1,0 +1,53 @@
+---
+- name: Create alloy directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: 0755
+  loop:
+    - /usr/local/bin
+    - /etc/alloy
+    - /var/run
+
+- name: Download alloy FreeBSD binary
+  get_url:
+    url: "https://github.com/grafana/alloy/releases/download/v{{ alloy_bsd_version }}/alloy-freebsd-amd64.zip"
+    dest: "/tmp/alloy-freebsd-amd64.zip"
+    mode: 0644
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Extract alloy binary
+  unarchive:
+    src: "/tmp/alloy-freebsd-amd64.zip"
+    dest: "/tmp/"
+    remote_src: true
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Copy alloy binary to /usr/local/bin
+  copy:
+    src: "/tmp/alloy-freebsd-amd64"
+    dest: "/usr/local/bin/alloy"
+    owner: root
+    group: wheel
+    mode: 0755
+    remote_src: true
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Clean up downloaded files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/alloy-freebsd-amd64.zip"
+    - "/tmp/alloy-freebsd-amd64"
+  tags:
+    - alloy
+    - alloy-install

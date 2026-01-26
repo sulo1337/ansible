@@ -1,0 +1,90 @@
+---
+- name: Copy alloy configuration template
+  template:
+    src: config.alloy.j2
+    dest: /etc/alloy/config.alloy
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: true
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Create rc.d directory
+  file:
+    path: /usr/local/etc/rc.d
+    state: directory
+    owner: root
+    group: wheel
+    mode: 0755
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Install alloy rc.d script
+  copy:
+    src: alloy.rc
+    dest: /usr/local/etc/rc.d/alloy
+    owner: root
+    group: wheel
+    mode: 0755
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Create rc.conf.d directory
+  file:
+    path: /etc/rc.conf.d
+    state: directory
+    owner: root
+    group: wheel
+    mode: 0755
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Configure alloy in rc.conf.d
+  copy:
+    content: |
+      alloy_enable="YES"
+      alloy_config="/etc/alloy/config.alloy"
+    dest: /etc/rc.conf.d/alloy
+    owner: root
+    group: wheel
+    mode: 0644
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Start alloy service
+  service:
+    name: alloy
+    state: started
+    enabled: true
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health
+
+- name: Wait for alloy to be ready
+  wait_for:
+    port: 12345
+    host: 127.0.0.1
+    timeout: 30
+    delay: 2
+  ignore_errors: true
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health
+
+- name: Verify alloy process is running
+  shell: pgrep -f "alloy run"
+  register: alloy_process
+  changed_when: false
+  failed_when: alloy_process.rc != 0
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health

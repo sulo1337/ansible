@@ -8,6 +8,12 @@
     smartctl_exporter_system_user: root
     smartctl_exporter_system_group: root
   tasks:
+    - name: Install smartmontools
+      apt:
+        name: smartmontools
+        state: present
+      when: smartctl_exporter_state == 'present'
+
     - name: Install smartctl exporter
       ansible.builtin.include_role:
         name: prometheus.prometheus.smartctl_exporter
@@ -30,6 +36,12 @@
         state: stopped
         enabled: false
       ignore_errors: true
+      when: smartctl_exporter_state == 'absent'
+
+    - name: Remove smartctl_exporter systemd service file
+      file:
+        path: /etc/systemd/system/smartctl_exporter.service
+        state: absent
       when: smartctl_exporter_state == 'absent'
 
     - name: Remove smartctl_exporter binary

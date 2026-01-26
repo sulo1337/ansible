@@ -1,0 +1,53 @@
+#!/bin/sh
+# {{ ansible_managed }}
+
+# PROVIDE: smartctl_exporter
+# REQUIRE: NETWORKING SERVERS
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="smartctl_exporter"
+rcvar="smartctl_exporter_enable"
+
+load_rc_config $name
+
+: ${smartctl_exporter_enable:="NO"}
+: ${smartctl_exporter_user:="root"}
+: ${smartctl_exporter_flags:=""}
+
+command="/usr/local/bin/smartctl_exporter"
+command_args="--smartctl.path=/usr/local/sbin/smartctl \
+    --smartctl.interval=60s \
+    --smartctl.rescan=10m \
+    --smartctl.device-exclude= \
+    --smartctl.device-include= \
+    --web.listen-address=127.0.0.1:9633 \
+    --web.telemetry-path=/metrics \
+    --log.level=info \
+    --log.format=logfmt \
+    ${smartctl_exporter_flags}"
+
+pidfile="/var/run/${name}.pid"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+smartctl_exporter_start()
+{
+    echo "Starting ${name}."
+    /usr/sbin/daemon -c -f -p ${pidfile} -u ${smartctl_exporter_user} ${command} ${command_args}
+}
+
+smartctl_exporter_stop()
+{
+    if [ -f ${pidfile} ]; then
+        echo "Stopping ${name}."
+        kill -TERM $(cat ${pidfile})
+        rm -f ${pidfile}
+    else
+        echo "${name} is not running."
+    fi
+}
+
+run_rc_command "$1"

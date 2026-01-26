@@ -2,6 +2,9 @@
 # Role state - set to 'absent' to uninstall
 alloy_state: present
 
+# Alloy version for BSD installations
+alloy_bsd_version: "1.12.2"
+
 # Alloy logging level
 alloy_log_level: error
 

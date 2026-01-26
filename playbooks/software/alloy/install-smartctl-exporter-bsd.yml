@@ -1,0 +1,129 @@
+---
+- name: Install smartctl exporter for BSD
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    smartctl_exporter_state: present  # Set to 'absent' to uninstall
+    smartctl_exporter_version: "0.14.0"
+  tasks:
+    - name: Install smartmontools
+      package:
+        name: smartmontools
+        state: present
+      when: smartctl_exporter_state == 'present'
+
+    - name: Create required directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      loop:
+        - /usr/local/bin
+        - /var/run
+      when: smartctl_exporter_state == 'present'
+
+    - name: Download smartctl_exporter FreeBSD binary
+      get_url:
+        url: "https://github.com/prometheus-community/smartctl_exporter/releases/download/v{{ smartctl_exporter_version }}/smartctl_exporter-{{ smartctl_exporter_version }}.freebsd-amd64.tar.gz"
+        dest: "/tmp/smartctl_exporter.tar.gz"
+        mode: 0644
+      when: smartctl_exporter_state == 'present'
+
+    - name: Extract smartctl_exporter binary
+      command:
+        cmd: tar -xzf /tmp/smartctl_exporter.tar.gz -C /tmp/
+        creates: "/tmp/smartctl_exporter-{{ smartctl_exporter_version }}.freebsd-amd64"
+      when: smartctl_exporter_state == 'present'
+
+    - name: Copy smartctl_exporter binary to /usr/local/bin
+      copy:
+        src: "/tmp/smartctl_exporter-{{ smartctl_exporter_version }}.freebsd-amd64/smartctl_exporter"
+        dest: "/usr/local/bin/smartctl_exporter"
+        owner: root
+        group: wheel
+        mode: 0755
+        remote_src: true
+      when: smartctl_exporter_state == 'present'
+
+    - name: Clean up downloaded files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/smartctl_exporter.tar.gz"
+        - "/tmp/smartctl_exporter-{{ smartctl_exporter_version }}.freebsd-amd64"
+      when: smartctl_exporter_state == 'present'
+
+    - name: Create rc.d directory
+      file:
+        path: /usr/local/etc/rc.d
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      when: smartctl_exporter_state == 'present'
+
+    - name: Install smartctl_exporter rc.d script
+      template:
+        src: smartctl_exporter.rc.j2
+        dest: /usr/local/etc/rc.d/smartctl_exporter
+        owner: root
+        group: wheel
+        mode: 0755
+      when: smartctl_exporter_state == 'present'
+
+    - name: Create rc.conf.d directory
+      file:
+        path: /etc/rc.conf.d
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      when: smartctl_exporter_state == 'present'
+
+    - name: Configure smartctl_exporter in rc.conf.d
+      copy:
+        content: |
+          smartctl_exporter_enable="YES"
+        dest: /etc/rc.conf.d/smartctl_exporter
+        owner: root
+        group: wheel
+        mode: 0644
+      when: smartctl_exporter_state == 'present'
+
+    - name: Start smartctl_exporter service
+      service:
+        name: smartctl_exporter
+        state: started
+        enabled: true
+      when: smartctl_exporter_state == 'present'
+
+    # Uninstall tasks
+    - name: Stop and disable smartctl_exporter service
+      service:
+        name: smartctl_exporter
+        state: stopped
+        enabled: false
+      ignore_errors: true
+      when: smartctl_exporter_state == 'absent'
+
+    - name: Remove smartctl_exporter rc.d script
+      file:
+        path: /usr/local/etc/rc.d/smartctl_exporter
+        state: absent
+      when: smartctl_exporter_state == 'absent'
+
+    - name: Remove smartctl_exporter rc.conf.d file
+      file:
+        path: /etc/rc.conf.d/smartctl_exporter
+        state: absent
+      when: smartctl_exporter_state == 'absent'
+
+    - name: Remove smartctl_exporter binary
+      file:
+        path: /usr/local/bin/smartctl_exporter
+        state: absent
+      when: smartctl_exporter_state == 'absent'

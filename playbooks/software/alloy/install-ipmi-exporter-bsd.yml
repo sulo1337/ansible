@@ -1,0 +1,157 @@
+---
+- name: Install IPMI exporter for BSD
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    ipmi_exporter_state: present  # Set to 'absent' to uninstall
+    ipmi_exporter_version: "1.10.1"
+  tasks:
+    - name: Install freeipmi
+      package:
+        name: freeipmi
+        state: present
+      when: ipmi_exporter_state == 'present'
+
+    - name: Validate that IPMI credentials are defined
+      ansible.builtin.assert:
+        that:
+          - ipmi_exporter_user is defined
+          - ipmi_exporter_user | length > 0
+          - ipmi_exporter_pass is defined
+          - ipmi_exporter_pass | length > 0
+        fail_msg: "ipmi_exporter_user and ipmi_exporter_pass must be defined and not empty"
+        success_msg: "IPMI credentials are properly defined"
+      when: ipmi_exporter_state == 'present'
+
+    - name: Create required directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      loop:
+        - /usr/local/bin
+        - /etc/ipmi_exporter
+        - /var/run
+      when: ipmi_exporter_state == 'present'
+
+    - name: Download ipmi_exporter FreeBSD binary
+      get_url:
+        url: "https://github.com/prometheus-community/ipmi_exporter/releases/download/v{{ ipmi_exporter_version }}/ipmi_exporter-{{ ipmi_exporter_version }}.freebsd-amd64.tar.gz"
+        dest: "/tmp/ipmi_exporter.tar.gz"
+        mode: 0644
+      when: ipmi_exporter_state == 'present'
+
+    - name: Extract ipmi_exporter binary
+      command:
+        cmd: tar -xzf /tmp/ipmi_exporter.tar.gz -C /tmp/
+        creates: "/tmp/ipmi_exporter-{{ ipmi_exporter_version }}.freebsd-amd64"
+      when: ipmi_exporter_state == 'present'
+
+    - name: Copy ipmi_exporter binary to /usr/local/bin
+      copy:
+        src: "/tmp/ipmi_exporter-{{ ipmi_exporter_version }}.freebsd-amd64/ipmi_exporter"
+        dest: "/usr/local/bin/ipmi_exporter"
+        owner: root
+        group: wheel
+        mode: 0755
+        remote_src: true
+      when: ipmi_exporter_state == 'present'
+
+    - name: Clean up downloaded files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/ipmi_exporter.tar.gz"
+        - "/tmp/ipmi_exporter-{{ ipmi_exporter_version }}.freebsd-amd64"
+      when: ipmi_exporter_state == 'present'
+
+    - name: Copy ipmi_exporter configuration file
+      template:
+        src: ipmi_remote.yml.j2
+        dest: /etc/ipmi_exporter/config.yaml
+        owner: root
+        group: wheel
+        mode: 0640
+        backup: true
+      when: ipmi_exporter_state == 'present'
+
+    - name: Create rc.d directory
+      file:
+        path: /usr/local/etc/rc.d
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      when: ipmi_exporter_state == 'present'
+
+    - name: Install ipmi_exporter rc.d script
+      template:
+        src: ipmi_exporter.rc.j2
+        dest: /usr/local/etc/rc.d/ipmi_exporter
+        owner: root
+        group: wheel
+        mode: 0755
+      when: ipmi_exporter_state == 'present'
+
+    - name: Create rc.conf.d directory
+      file:
+        path: /etc/rc.conf.d
+        state: directory
+        owner: root
+        group: wheel
+        mode: 0755
+      when: ipmi_exporter_state == 'present'
+
+    - name: Configure ipmi_exporter in rc.conf.d
+      copy:
+        content: |
+          ipmi_exporter_enable="YES"
+        dest: /etc/rc.conf.d/ipmi_exporter
+        owner: root
+        group: wheel
+        mode: 0644
+      when: ipmi_exporter_state == 'present'
+
+    - name: Start ipmi_exporter service
+      service:
+        name: ipmi_exporter
+        state: started
+        enabled: true
+      when: ipmi_exporter_state == 'present'
+
+    # Uninstall tasks
+    - name: Stop and disable ipmi_exporter service
+      service:
+        name: ipmi_exporter
+        state: stopped
+        enabled: false
+      ignore_errors: true
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter rc.d script
+      file:
+        path: /usr/local/etc/rc.d/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter rc.conf.d file
+      file:
+        path: /etc/rc.conf.d/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter binary
+      file:
+        path: /usr/local/bin/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter configuration directory
+      file:
+        path: /etc/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'

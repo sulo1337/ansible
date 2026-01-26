@@ -8,6 +8,12 @@
     ipmi_exporter_system_user: root
     ipmi_exporter_system_group: root
   tasks:
+    - name: Install freeipmi-tools
+      apt:
+        name: freeipmi-tools
+        state: present
+      when: ipmi_exporter_state == 'present'
+
     - name: Validate that IPMI credentials are defined
       ansible.builtin.assert:
         that:
@@ -60,6 +66,12 @@
         state: stopped
         enabled: false
       ignore_errors: true
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter systemd service file
+      file:
+        path: /etc/systemd/system/ipmi_exporter.service
+        state: absent
       when: ipmi_exporter_state == 'absent'
 
     - name: Remove ipmi_exporter binary

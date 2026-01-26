@@ -3,12 +3,12 @@
   include_tasks: validate.yml
   when: alloy_state | default('present') == 'present'
 
-- name: Include installation tasks
-  include_tasks: install.yml
+- name: Include OS-specific installation tasks
+  include_tasks: "install-{{ ansible_os_family }}.yml"
   when: alloy_state | default('present') == 'present'
 
-- name: Include configuration tasks
-  include_tasks: configure.yml
+- name: Include OS-specific configuration tasks
+  include_tasks: "configure-{{ ansible_os_family }}.yml"
   when: alloy_state | default('present') == 'present'
 
 - name: Include uninstall tasks

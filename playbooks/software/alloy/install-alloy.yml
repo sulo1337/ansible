@@ -1,15 +1,39 @@
 ---
-- name: Install smartctl exporter if enabled
+- name: Detect OS family
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Set OS facts
+      set_fact:
+        detected_os_family: "{{ ansible_os_family }}"
+
+- name: Install smartctl exporter if enabled (Debian)
   ansible.builtin.import_playbook: install-smartctl-exporter.yml
   when: 
     - alloy_enable_smartctl_scrape is defined
     - alloy_enable_smartctl_scrape | bool
+    - hostvars[groups['all'][0]].detected_os_family == 'Debian'
 
-- name: Install IPMI exporter if enabled
+- name: Install smartctl exporter if enabled (BSD)
+  ansible.builtin.import_playbook: install-smartctl-exporter-bsd.yml
+  when: 
+    - alloy_enable_smartctl_scrape is defined
+    - alloy_enable_smartctl_scrape | bool
+    - hostvars[groups['all'][0]].detected_os_family == 'FreeBSD'
+
+- name: Install IPMI exporter if enabled (Debian)
   ansible.builtin.import_playbook: install-ipmi-exporter.yml
   when:
     - alloy_enable_ipmi_exporter is defined
     - alloy_enable_ipmi_exporter | bool
+    - hostvars[groups['all'][0]].detected_os_family == 'Debian'
+
+- name: Install IPMI exporter if enabled (BSD)
+  ansible.builtin.import_playbook: install-ipmi-exporter-bsd.yml
+  when:
+    - alloy_enable_ipmi_exporter is defined
+    - alloy_enable_ipmi_exporter | bool
+    - hostvars[groups['all'][0]].detected_os_family == 'FreeBSD'
 
 - name: Install and configure Grafana Alloy
   hosts: all

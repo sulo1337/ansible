@@ -1,0 +1,49 @@
+#!/bin/sh
+# {{ ansible_managed }}
+
+# PROVIDE: ipmi_exporter
+# REQUIRE: NETWORKING SERVERS
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="ipmi_exporter"
+rcvar="ipmi_exporter_enable"
+
+load_rc_config $name
+
+: ${ipmi_exporter_enable:="NO"}
+: ${ipmi_exporter_config:="/etc/ipmi_exporter/config.yaml"}
+: ${ipmi_exporter_user:="root"}
+: ${ipmi_exporter_flags:=""}
+
+command="/usr/local/bin/ipmi_exporter"
+command_args="--config.file=${ipmi_exporter_config} \
+    --web.listen-address=127.0.0.1:9290 \
+    --log.level=info \
+    --log.format=logfmt \
+    ${ipmi_exporter_flags}"
+
+pidfile="/var/run/${name}.pid"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+ipmi_exporter_start()
+{
+    echo "Starting ${name}."
+    /usr/sbin/daemon -c -f -p ${pidfile} -u ${ipmi_exporter_user} ${command} ${command_args}
+}
+
+ipmi_exporter_stop()
+{
+    if [ -f ${pidfile} ]; then
+        echo "Stopping ${name}."
+        kill -TERM $(cat ${pidfile})
+        rm -f ${pidfile}
+    else
+        echo "${name} is not running."
+    fi
+}
+
+run_rc_command "$1"
