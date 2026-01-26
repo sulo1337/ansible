@@ -1,0 +1,80 @@
+---
+- name: Install IPMI exporter
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    ipmi_exporter_state: present  # Set to 'absent' to uninstall
+    ipmi_exporter_system_user: root
+    ipmi_exporter_system_group: root
+  tasks:
+    - name: Validate that IPMI credentials are defined
+      ansible.builtin.assert:
+        that:
+          - ipmi_exporter_user is defined
+          - ipmi_exporter_user | length > 0
+          - ipmi_exporter_pass is defined
+          - ipmi_exporter_pass | length > 0
+        fail_msg: "ipmi_exporter_user and ipmi_exporter_pass must be defined and not empty"
+        success_msg: "IPMI credentials are properly defined"
+      when: ipmi_exporter_state == 'present'
+
+    - name: Install IPMI exporter
+      ansible.builtin.include_role:
+        name: prometheus.prometheus.ipmi_exporter
+      vars:
+        ipmi_exporter_web_listen_address: "127.0.0.1:9290"
+      when: ipmi_exporter_state == 'present'
+
+    - name: Create ipmi_exporter configuration directory
+      file:
+        path: /etc/ipmi_exporter
+        state: directory
+        owner: root
+        group: root
+        mode: 0765
+      when: ipmi_exporter_state == 'present'
+
+    - name: Copy ipmi_exporter configuration file
+      template:
+        src: ipmi_remote.yml.j2
+        dest: /etc/ipmi_exporter/config.yaml
+        owner: root
+        group: root
+        mode: 0640
+        backup: true
+      when: ipmi_exporter_state == 'present'
+
+    - name: Ensure ipmi_exporter service is enabled and started
+      systemd:
+        name: ipmi_exporter
+        enabled: true
+        state: started
+        daemon_reload: true
+      when: ipmi_exporter_state == 'present'
+
+    # Uninstall tasks
+    - name: Stop and disable ipmi_exporter service
+      systemd:
+        name: ipmi_exporter
+        state: stopped
+        enabled: false
+      ignore_errors: true
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter binary
+      file:
+        path: /usr/local/bin/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Remove ipmi_exporter configuration directory
+      file:
+        path: /etc/ipmi_exporter
+        state: absent
+      when: ipmi_exporter_state == 'absent'
+
+    - name: Reload systemd daemon after uninstall
+      systemd:
+        daemon_reload: true
+      when: ipmi_exporter_state == 'absent'

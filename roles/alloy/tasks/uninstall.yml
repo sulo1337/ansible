@@ -1,0 +1,52 @@
+---
+- name: Stop alloy service
+  systemd:
+    name: alloy
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+    - alloy
+    - alloy-uninstall
+
+- name: Remove alloy package
+  apt:
+    name: alloy
+    state: absent
+    purge: true
+  tags:
+    - alloy
+    - alloy-uninstall
+
+- name: Remove alloy configuration directory
+  file:
+    path: /etc/alloy
+    state: absent
+  tags:
+    - alloy
+    - alloy-uninstall
+
+- name: Remove alloy systemd override
+  file:
+    path: /etc/systemd/system/alloy.service
+    state: absent
+  notify: Reload systemd
+  tags:
+    - alloy
+    - alloy-uninstall
+
+- name: Remove Grafana repository
+  deb822_repository:
+    name: grafana
+    state: absent
+  when: alloy_remove_repo | default(false) | bool
+  tags:
+    - alloy
+    - alloy-uninstall
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+  tags:
+    - alloy
+    - alloy-uninstall

@@ -12,6 +12,8 @@ collections:
     version: 5.0.0
   - name: idiv_biodiversity.systemd
     version: 0.1.0
+  - name: prometheus.prometheus
+    version: 0.27.5
 roles:
   - name: geerlingguy.docker
     version: 7.4.3

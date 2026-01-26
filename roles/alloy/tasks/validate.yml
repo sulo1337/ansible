@@ -1,0 +1,34 @@
+---
+- name: Validate required authentication credentials are defined
+  ansible.builtin.assert:
+    that:
+      - alloy_prometheus_push_username is defined
+      - alloy_prometheus_push_username | length > 0
+      - alloy_prometheus_push_password is defined
+      - alloy_prometheus_push_password | length > 0
+      - alloy_loki_push_username is defined
+      - alloy_loki_push_username | length > 0
+      - alloy_loki_push_password is defined
+      - alloy_loki_push_password | length > 0
+    fail_msg: "Required authentication credentials (alloy_prometheus_push_username, alloy_prometheus_push_password, alloy_loki_push_username, alloy_loki_push_password) must be defined and not empty"
+    success_msg: "All required authentication credentials are properly defined"
+  tags:
+    - alloy
+    - alloy-validate
+    - always
+
+- name: Validate that alloy_ipmi_scrape_target is defined when IPMI exporter is enabled
+  ansible.builtin.assert:
+    that:
+      - alloy_ipmi_scrape_target is defined
+      - alloy_ipmi_scrape_target is string
+      - alloy_ipmi_scrape_target | length > 0
+    fail_msg: "alloy_ipmi_scrape_target must be defined as a non-empty string (single host) when alloy_enable_ipmi_exporter is enabled"
+    success_msg: "alloy_ipmi_scrape_target is properly defined"
+  when:
+    - alloy_enable_ipmi_exporter is defined
+    - alloy_enable_ipmi_exporter | bool
+  tags:
+    - alloy
+    - alloy-validate
+    - always

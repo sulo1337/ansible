@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+modules:
+  default:
+    user: "{{ ipmi_exporter_user }}"
+    pass: "{{ ipmi_exporter_pass }}"
+    driver: "LAN_2_0"
+    privilege: "admin"
+    timeout: 10000
+    collectors:
+      - bmc
+      - ipmi
+      - chassis
+      - dcmi
+      - sel
+      - sm-lan-mode

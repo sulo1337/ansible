@@ -1,0 +1,36 @@
+---
+# Role state - set to 'absent' to uninstall
+alloy_state: present
+
+# Alloy logging level
+alloy_log_level: error
+
+# Remote write endpoints
+alloy_prometheus_push_url: https://prometheus.acharya.cloud/api/v1/write
+alloy_loki_push_url: https://loki.acharya.cloud/loki/api/v1/push
+
+# Authentication credentials (should be overridden in inventory or playbook vars)
+# alloy_prometheus_push_username: ""
+# alloy_prometheus_push_password: ""
+# alloy_loki_push_username: ""
+# alloy_loki_push_password: ""
+
+# Exporter and scraping configuration
+alloy_enable_node_exporter: true
+alloy_enable_process_exporter: true
+alloy_enable_docker_metrics_exporter: true
+alloy_enable_docker_logs_exporter: true
+alloy_enable_journal_scrape: true
+alloy_enable_file_scrape: true
+alloy_file_scrape_paths: /var/log/{syslog,messages,*.log}
+
+# Cluster name for labeling
+alloy_cluster_name: unknown
+
+# Optional exporters (disabled by default)
+# alloy_enable_smartctl_scrape: false
+# alloy_enable_ipmi_exporter: false
+# alloy_ipmi_scrape_target: ""  # Required if alloy_enable_ipmi_exporter is true
+
+# Uninstall options
+alloy_remove_repo: false  # Set to true to also remove Grafana repository when uninstalling

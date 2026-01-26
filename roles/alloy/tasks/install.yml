@@ -1,0 +1,69 @@
+---
+- name: Install gpg
+  apt:
+    name: gpg
+    state: present
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Create directory for keyrings
+  file:
+    path: /etc/apt/keyrings/
+    state: directory
+    mode: 0755
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Add Grafana repository with GPG key
+  deb822_repository:
+    name: grafana
+    types: [deb]
+    uris: https://apt.grafana.com
+    suites: [stable]
+    components: [main]
+    signed_by: https://apt.grafana.com/gpg.key
+    state: present
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Update apt and install alloy
+  apt:
+    update_cache: true
+    name: alloy
+    state: present
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Check if systemd override exists
+  stat:
+    path: /etc/systemd/system/alloy.service
+  register: alloy_systemd_override
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Copy alloy service file to /etc/systemd/system
+  copy:
+    src: /lib/systemd/system/alloy.service
+    dest: /etc/systemd/system/alloy.service
+    remote_src: true
+  when: not alloy_systemd_override.stat.exists
+  tags:
+    - alloy
+    - alloy-install
+
+- name: Change alloy.service systemd user to root
+  lineinfile:
+    path: /etc/systemd/system/alloy.service
+    regexp: '^User='
+    line: 'User=root'
+    state: present
+    backup: true
+  notify: Reload systemd
+  tags:
+    - alloy
+    - alloy-install

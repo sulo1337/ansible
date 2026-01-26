@@ -1,0 +1,36 @@
+---
+galaxy_info:
+  role_name: alloy
+  author: Sulochan Acharya
+  description: Install and configure Grafana Alloy for metrics and logs collection
+  company: acharya.cloud
+  
+  license: MIT
+  
+  min_ansible_version: "2.9"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+  
+  galaxy_tags:
+    - monitoring
+    - observability
+    - grafana
+    - alloy
+    - prometheus
+    - loki
+    - metrics
+    - logs
+
+dependencies: []
+
+collections:
+  - prometheus.prometheus

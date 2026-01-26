@@ -1,0 +1,79 @@
+---
+- name: Check if docker is installed
+  command: docker --version
+  register: docker_validation
+  ignore_errors: true
+  changed_when: false
+  check_mode: false
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Set alloy to disable docker exporters if docker not installed
+  set_fact:
+    alloy_enable_docker_metrics_exporter: false
+    alloy_enable_docker_logs_exporter: false
+  when: docker_validation is failed
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Copy alloy configuration template
+  template:
+    src: config.alloy.j2
+    dest: /etc/alloy/config.alloy
+    owner: root
+    group: root
+    mode: 0640
+    backup: true
+  notify: Restart alloy
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Ensure alloy is enabled and started
+  systemd:
+    name: alloy
+    enabled: true
+    state: started
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Flush handlers
+  meta: flush_handlers
+  tags:
+    - alloy
+    - alloy-configure
+
+- name: Gather service facts
+  service_facts:
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health
+
+- name: Verify alloy service is running
+  assert:
+    that:
+      - "'alloy.service' in services"
+      - "services['alloy.service'].state == 'running'"
+      - "services['alloy.service'].status == 'enabled'"
+    fail_msg: "Alloy service is not running properly. State: {{ services['alloy.service'].state | default('unknown') }}, Status: {{ services['alloy.service'].status | default('unknown') }}"
+    success_msg: "Alloy service is running and enabled successfully"
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health
+
+- name: Wait for alloy to be ready
+  wait_for:
+    port: 12345
+    host: 127.0.0.1
+    timeout: 30
+    delay: 2
+  ignore_errors: true
+  tags:
+    - alloy
+    - alloy-configure
+    - alloy-health

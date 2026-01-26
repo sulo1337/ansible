@@ -1,0 +1,17 @@
+---
+- name: Include validation tasks
+  include_tasks: validate.yml
+  when: alloy_state | default('present') == 'present'
+
+- name: Include installation tasks
+  include_tasks: install.yml
+  when: alloy_state | default('present') == 'present'
+
+- name: Include configuration tasks
+  include_tasks: configure.yml
+  when: alloy_state | default('present') == 'present'
+
+- name: Include uninstall tasks
+  include_tasks: uninstall.yml
+  when: alloy_state | default('present') == 'absent'
+

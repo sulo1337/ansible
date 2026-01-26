@@ -1,101 +1,19 @@
-- name: install grafana alloy
+---
+- name: Install smartctl exporter if enabled
+  ansible.builtin.import_playbook: install-smartctl-exporter.yml
+  when: 
+    - alloy_enable_smartctl_scrape is defined
+    - alloy_enable_smartctl_scrape | bool
+
+- name: Install IPMI exporter if enabled
+  ansible.builtin.import_playbook: install-ipmi-exporter.yml
+  when:
+    - alloy_enable_ipmi_exporter is defined
+    - alloy_enable_ipmi_exporter | bool
+
+- name: Install and configure Grafana Alloy
   hosts: all
   become: true
   gather_facts: true
-  vars:
-    alloy_log_level: error
-    alloy_prometheus_push_url: https://prometheus.acharya.cloud/api/v1/write
-    alloy_loki_push_url: https://loki.acharya.cloud/loki/api/v1/push
-    alloy_enable_node_exporter: true
-    alloy_enable_process_exporter: true
-    alloy_enable_docker_metrics_exporter: true
-    alloy_enable_docker_logs_exporter: true
-    alloy_enable_journal_scrape: true
-    alloy_enable_file_scrape: true
-    alloy_file_scrape_paths: /var/log/{syslog,messages,*.log}
-    alloy_cluster_name: unknown
-  tasks:
-    - name: install gpg
-      apt:
-        name: gpg
-        state: present
-
-    - name: create directory for keyrings
-      file:
-        path: /etc/apt/keyrings/
-        state: directory
-
-    # Uncomment for older apt versions that do not support deb822_repository
-    # - name: add grafana gpg key
-    #   apt_key:
-    #     url: https://apt.grafana.com/gpg.key
-    #     state: present
-    #     keyring: /etc/apt/keyrings/grafana.gpg
-
-    - name: Add Grafana repository with GPG key
-      deb822_repository:
-        name: grafana
-        types: [deb]
-        uris: https://apt.grafana.com
-        suites: [stable]
-        components: [main]
-        signed_by: https://apt.grafana.com/gpg.key
-        state: present
-
-    # Uncomment for older apt versions that do not support deb822_repository
-    # - name: add grafana to sources list
-    #   lineinfile:
-    #     path: /etc/apt/sources.list.d/grafana.list
-    #     line: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
-    #     create: true
-
-    - name: update apt and install alloy
-      apt:
-        update_cache: true
-        name: alloy
-        state: present
-
-    # custom systemd file to change default alloy user to root
-    - name: copy alloy service file to /etc/systemd/system
-      copy:
-        src: /lib/systemd/system/alloy.service
-        dest: /etc/systemd/system/alloy.service
-        remote_src: true
-    
-    - name: change alloy.service systemd user to root
-      lineinfile:
-        path: /etc/systemd/system/alloy.service
-        regexp: '^User='
-        line: 'User=root'
-        state: present
-        backup: true
-
-    - name: reload systemd
-      systemd:
-        daemon_reload: true
-
-    - name: check if docker is installed
-      command: docker --version
-      register: docker_validation
-      ignore_errors: true
-      changed_when: false
-
-    - name: set alloy to use docker metrics and logs exporter
-      set_fact:
-        alloy_enable_docker_metrics_exporter: false
-        alloy_enable_docker_logs_exporter: false
-      when: docker_validation is failed
-
-    - name: copy alloy template to host
-      template:
-        src: config.alloy.j2
-        dest: /etc/alloy/config.alloy
-        owner: root
-        group: root
-        mode: 0640
-
-    - name: start/restart and enable alloy
-      systemd:
-        name: alloy
-        state: restarted
-        enabled: true
+  roles:
+    - role: alloy
