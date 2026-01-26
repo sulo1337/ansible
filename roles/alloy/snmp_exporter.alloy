@@ -1,0 +1,241 @@
+logging {
+        level = "error"
+}
+
+/** START - remote endpoint configuration */
+
+// prometheus push endpoint reference
+prometheus.remote_write "prom01" {
+        endpoint {
+                url = "https://prometheus.acharya.cloud/api/v1/write"
+                basic_auth {
+                        username = "admin"
+                        password = "kw4JSWLrViLDfk66hGMGPxxRhBSXvrp7"
+                }
+        }
+}
+
+// loki write endpoint reference
+loki.write "loki01" {
+        endpoint {
+                url = "https://loki.acharya.cloud/loki/api/v1/push"
+                basic_auth {
+                        username = "admin"
+                        password = "MhG5GU8venZxbejGNskPdrvfVwJsRBjM"
+                }
+        }
+}
+
+/** END - remote endpoint configuration */
+
+/** START - node exporter configuration */
+
+// prometheus node exporter configuration
+prometheus.exporter.unix "node_exporter" {
+    include_exporter_metrics = true
+    enable_collectors                = ["systemd"]
+    disable_collectors       = ["mdadm", "ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+
+    filesystem {
+        fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+        mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+        mount_timeout        = "5s"
+    }
+
+    netclass {
+        ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+    }
+
+    netdev {
+        device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+    }
+}
+
+// relabel metrics collected by node_exporter
+discovery.relabel "node_exporter" {
+    targets = prometheus.exporter.unix.node_exporter.targets
+
+    rule {
+      target_label = "instance"
+      replacement = constants.hostname
+    }
+
+    rule {
+        target_label = "job"
+        replacement  = "node_exporter"
+    }
+
+    rule {
+        target_label = "cluster"
+        replacement = "pldalprod"
+    }
+}
+
+// prometheus scrape config for node_exporter job
+prometheus.scrape "node_exporter" {
+    targets    = discovery.relabel.node_exporter.output
+    forward_to = [prometheus.remote_write.prom01.receiver]
+    job_name   = "node_exporter"
+}
+
+/** END - node exporter configuration */
+
+
+/** START - process exporter configuration */
+
+// prometheus process exporter configuration
+prometheus.exporter.process "process_exporter" {
+        matcher {
+                name    = "{{.Comm}}"
+                cmdline = [".+"]
+        }
+}
+
+// relabel metrics collected by process_exporter
+discovery.relabel "process_exporter" {
+        targets = prometheus.exporter.process.process_exporter.targets
+
+        rule {
+                target_label = "instance"
+                replacement  = constants.hostname
+        }
+
+        rule {
+                target_label = "job"
+                replacement  = "process_exporter"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "pldalprod"
+        }
+}
+
+// prometheus scrape config for process_exporter job
+prometheus.scrape "process_exporter" {
+        targets    = discovery.relabel.process_exporter.output
+        forward_to = [prometheus.remote_write.prom01.receiver]
+        job_name   = "process_exporter"
+}
+
+/** END - process exporter configuration */
+
+/** START - system logs loki configuration */
+
+// JOURNAL SCRAPING
+
+// relabel rules for journal scraping
+discovery.relabel "node_journal_scrape" {
+        targets = []
+
+        rule {
+                source_labels = ["__journal__systemd_unit"]
+                target_label  = "unit"
+        }
+
+        rule {
+                source_labels = ["__journal__boot_id"]
+                target_label  = "boot_id"
+        }
+
+        rule {
+                source_labels = ["__journal__transport"]
+                target_label  = "transport"
+        }
+
+        rule {
+                source_labels = ["__journal_priority_keyword"]
+                target_label  = "level"
+        }
+
+        rule {
+                target_label = "cluster"
+                replacement = "pldalprod"
+        }
+}
+
+// journal scrape configuration
+loki.source.journal "node_journal_scrape" {
+        max_age       = "24h0m0s"
+        relabel_rules = discovery.relabel.node_journal_scrape.rules
+        forward_to    = [loki.write.loki01.receiver]
+        labels        = {
+                job = "node_journal_scrape",
+                instance = constants.hostname,
+        }
+}
+
+
+
+// DIRECT FILE SCRAPING
+
+// files to be scraped directly
+local.file_match "node_direct_file_scrape" {
+        path_targets = [{
+                __address__ = "localhost",
+                __path__    = "/var/log/{syslog,messages,*.log}",
+                job = "node_direct_file_scrape",
+                instance = constants.hostname,
+                cluster = "pldalprod",
+        }]
+}
+
+// direct scrape configuration
+loki.source.file "node_direct_file_scrape" {
+        targets    = local.file_match.node_direct_file_scrape.targets
+        forward_to = [loki.write.loki01.receiver]
+}
+
+/** END - system logs loki configuration */
+
+/** START - SNMP configuration */
+
+// prometheus snmp exporter configuration
+prometheus.exporter.snmp "snmp_exporter" {
+    config_file = "/etc/alloy/snmp_auths.yml"
+    config_merge_strategy = "merge"
+
+    target "pldalprodfw01" {
+        address = "192.168.100.1"
+        module  = "system,if_mib,hrDevice,hrStorage"
+        auth    = "pldalprodfw01"
+    }
+
+    target "pldalprodsw01" {
+        address = "192.168.100.2"
+        module  = "system,if_mib,hrDevice,hrStorage"
+        auth    = "pldalprodsw01"
+    }
+}
+
+// relabel metrics collected by snmp_exporter
+discovery.relabel "snmp_exporter" {
+    targets = prometheus.exporter.snmp.snmp_exporter.targets
+
+    rule {
+        source_labels = ["job"]
+        target_label  = "instance"
+        regex = ".*/(.+)"
+        replacement = "$1"
+    }
+
+    rule {
+        target_label = "job"
+        replacement  = "snmp_exporter"
+    }
+
+    rule {
+        target_label = "cluster"
+        replacement  = "pldalprod"
+    }
+}
+
+// prometheus scrape config for snmp
+prometheus.scrape "snmp_exporter" {
+    targets        = discovery.relabel.snmp_exporter.output
+    forward_to     = [prometheus.remote_write.prom01.receiver]
+    job_name       = "snmp_exporter"
+    scrape_timeout = "30s"
+}
+
+/** END - SNMP configuration */
