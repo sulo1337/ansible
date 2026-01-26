@@ -12,13 +12,3 @@
       node_exporter_enabled: true
     roles:
       - role: geerlingguy.node_exporter
-    
-    tasks:
-      - name: Allow UFW port 9100
-        community.general.ufw:
-          rule: allow
-          port: 9100
-          proto: tcp
-          from_ip: 10.0.0.0/16
-        tags:
-          - firewall
