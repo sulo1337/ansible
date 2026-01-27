@@ -7,6 +7,9 @@
     ipmi_exporter_state: present  # Set to 'absent' to uninstall
     ipmi_exporter_version: "1.10.1"
   tasks:
+    - name: Skip non-FreeBSD hosts
+      meta: end_host
+      when: ansible_os_family != 'FreeBSD'
     - name: Install freeipmi
       package:
         name: freeipmi

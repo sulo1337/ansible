@@ -8,6 +8,9 @@
     ipmi_exporter_system_user: root
     ipmi_exporter_system_group: root
   tasks:
+    - name: Skip non-Debian hosts
+      meta: end_host
+      when: ansible_os_family != 'Debian'
     - name: Install freeipmi-tools
       apt:
         name: freeipmi-tools
@@ -40,6 +43,7 @@
         group: root
         mode: 0765
       when: ipmi_exporter_state == 'present'
+      changed_when: false
 
     - name: Copy ipmi_exporter configuration file
       template:
@@ -50,6 +54,7 @@
         mode: 0640
         backup: true
       when: ipmi_exporter_state == 'present'
+      changed_when: false
 
     - name: Ensure ipmi_exporter service is enabled and started
       systemd:

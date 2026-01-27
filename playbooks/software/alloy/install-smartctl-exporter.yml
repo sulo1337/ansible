@@ -8,6 +8,9 @@
     smartctl_exporter_system_user: root
     smartctl_exporter_system_group: root
   tasks:
+    - name: Skip non-Debian hosts
+      meta: end_host
+      when: ansible_os_family != 'Debian'
     - name: Install smartmontools
       apt:
         name: smartmontools
